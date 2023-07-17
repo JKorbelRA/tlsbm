@@ -1,12 +1,11 @@
-
 //==============================================================================
 ///
-/// @file Client.c
+/// @file client.c
 ///
 ///
-/// @brief A test TLS client using several TLS libraries.
+/// @brief A test TLS client using wolfSSL library.
 ///
-/// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
+/// Copyright (c) 2022 Rockwell Automation Technologies, Inc.
 /// All rights reserved.
 //==============================================================================
 
@@ -14,7 +13,6 @@
 // Include files
 //------------------------------------------------------------------------------
 #include <stdio.h>
-#include <stdbool.h>
 #include <limits.h>
 #include <fcntl.h>
 
@@ -25,12 +23,9 @@
 #include <arpa/inet.h>
 #endif
 
-
-#include <crazywolf/Common.h>
-#include <crazywolf/Tlslib.h>
-#include <crazywolf/Platform.h>
-#include <crazywolf/Environment.h> // Generated header, look into CMake.
-
+#include "Common.h"
+// wolfSSL
+#include <wolfssl/ssl.h>
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -103,14 +98,20 @@ static char cw_Client_errBuffer[4096];
 //-----------------------------------------------------------------------------
 static int cw_Client_TcpConnect(int* pSocket, const char* pIp, uint16_t port)
 {
-    *pSocket = CW_Platform_Socket(true);
+    *pSocket = (int)socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (*pSocket == -1) // INVALID_SOCKET undef in Unix
+    if (*pSocket == -1) //INVALID_SOCKET undef in Unix
     {
         CW_Common_Die("can't get socket");
     }
 
-    if (CW_Platform_Connect(*pSocket, CW_Platform_GetIp4Addr(pIp), port) == -1)
+    struct sockaddr_in srvAddr;
+    memset(&srvAddr, sizeof(srvAddr), 0);
+    srvAddr.sin_family = AF_INET;
+    srvAddr.sin_port = htons(port);
+    srvAddr.sin_addr.s_addr = inet_addr(pIp);
+
+    if (connect(*pSocket, (struct sockaddr*)&srvAddr, sizeof(srvAddr)) == -1)
     {
         CW_Common_Die("socket connect failed");
     }
@@ -285,12 +286,41 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
     }
 
     printf("Server %s:%d connected\n", pSrvIP, port);
+    WOLFSSL_METHOD* pMethod = wolfTLSv1_2_client_method();
+    if (pMethod == NULL)
+    {
+        CW_Common_Die("wolf method error");
+    }
 
-    void* pSecureCtx = CW_Tlslib_CreateSecureContext();
+    WOLFSSL_CTX* pCtx = wolfSSL_CTX_new(pMethod);
+    if (pCtx == NULL)
+    {
+        CW_Common_Die("wolf ctx error");
+    }
 
-    void* pSecureSocketCtx = CW_Tlslib_MakeSocketSecure(socket, pSecureCtx);
+    if (wolfSSL_CTX_load_verify_locations(pCtx, "cert.pem", 0) != WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("invalid cert path");
+    }
 
-    CW_TlsLib_Handshake(pSecureSocketCtx);
+    // TODO check if exists first or try others if fails?
+    if (!wolfSSL_CTX_set_cipher_list(pCtx, "ECDHE-ECDSA-AES128-SHA256"))
+    {
+        CW_Common_Die("wolf cipher list error");
+    }
+
+    WOLFSSL* pSsl = wolfSSL_new(pCtx);
+    if (pSsl == NULL)
+    {
+        CW_Common_Die("wolf ssl error");
+    }
+
+    if (wolfSSL_set_fd(pSsl, socket) != WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("wolf set_fd error");
+    }
+
+    cw_Client_WolfConnect(pSsl);
 
     // large buffers allocated on heap
     static char errBuffer[WOLFSSL_MAX_ERROR_SZ];
@@ -358,13 +388,14 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 //------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-    CW_Platform_Startup();
-    CW_Tlslib_Startup();
-
     uint16_t port = SIMPLE_SSL_PORT;
     char* pServerIP = SIMPLE_SSL_SERVER_ADDR;
     char* pCertPath = SIMPLE_SSL_CERT_PATH;
 
+//wolfSSL_Debugging_ON();
+
+    // check args count
+    // TODO enable to change port by cmd args
     if (argc == 2)
     {
         // use argv[1] as server IP
@@ -376,12 +407,18 @@ int main(int argc, char** argv)
         printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIP);
     }
 
+#ifdef WIN32
+    WSADATA wsaData;
+    if (WSAStartup(0x0002, &wsaData) != NO_ERROR)
+    {
+        return 1;
+    }
+#endif // WIN32
+
     int result = 1;
+    wolfSSL_Init();
     result = cw_Client_TlsClient(pServerIP, port, pCertPath);
-
-    CW_Tlslib_Shutdown();
-    CW_Platform_Shutdown();
-
+    wolfSSL_Cleanup();
     return result;
 } // End: main()
 

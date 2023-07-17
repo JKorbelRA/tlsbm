@@ -1,0 +1,17 @@
+//==============================================================================
+///
+/// @file Environment.h
+///
+///
+/// @brief Generated settings file.
+///
+/// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
+/// All rights reserved.
+//==============================================================================
+#if !defined(CW_ENVIRONMENT_H)
+#define CW_ENVIRONMENT_H
+
+
+#cmakedefine CW_ENV_DEBUG_ENABLE
+
+#endif // !defined(CW_ENVIRONMENT_H)

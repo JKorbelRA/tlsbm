@@ -9,35 +9,79 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 # require C99 standard
 set(C_STANDARD 99)
 
-set(WOLFSSL_SOURCE "" CACHE PATH "Path to wolfSSL sources")
+# OPTIONS
+
+option(CW_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance." OFF)
 
 
-if (EXISTS "${WOLFSSL_SOURCE}")
+# SOURCES
 
-    list(APPEND CMAKE_MODULE_PATH "${WOLFSSL_SOURCE}/../CMake/Modules")
-    include(PathSetter)
+set(CLIENT_SRC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Client.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Common.c
+)
+set(SERVER_SRC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Server.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Common.c
+)
 
-    set( WOLFSSL_CMAKE_DEFINITIONS ON )
-    add_subdirectory("${WOLFSSL_SOURCE}" wolfssl)
+# INCLUDES
 
-    #GenerateWolfSSLEnvironment()
-else()
-    message(SEND_ERROR "WOLFSSL_SOURCE not set to a proper source location")
-endif()
+include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-include_directories("${WOLFSSL_SOURCE}/3rdparty/wolfssl" ${CMAKE_BINARY_DIR})
+# LIBRARIES
 
-# user-created
-add_executable(${PROJECT_NAME}-client
-                "Client.c"
-                "Common.c"
-               )
+add_subdirectory(wolfssl)
 
-target_link_libraries(${PROJECT_NAME}-client wolfSSL)
+add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
 
-add_executable(${PROJECT_NAME}-server
-                "Server.c"
-                "Common.c"
-               )
+target_link_libraries(${PROJECT_NAME}-wolfssl-client tlslib-wolfssl)
 
-target_link_libraries(${PROJECT_NAME}-server wolfSSL)
+add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
+
+target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
+
+## # ------------------------------------------------------------------------------
+## 
+## add_subdirectory(mbedtls)
+## 
+## add_executable(${PROJECT_NAME}-mbedtls-client ${CLIENT_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-mbedtls-client tlslib-mbedtls)
+## 
+## add_executable(${PROJECT_NAME}-mbedtls-server ${SERVER_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-mbedtls-server tlslib-mbedtls)
+## 
+## # ------------------------------------------------------------------------------
+## 
+## 
+## add_subdirectory(cyclonessl)
+## 
+## add_executable(${PROJECT_NAME}-cyclonessl-client ${CLIENT_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-cyclonessl-client tlslib-cyclonessl)
+## 
+## add_executable(${PROJECT_NAME}-cyclonessl-server ${SERVER_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-cyclonessl-server tlslib-cyclonessl)
+## 
+## 
+## # ------------------------------------------------------------------------------
+## 
+## 
+## add_subdirectory(sharkssl)
+## 
+## add_executable(${PROJECT_NAME}-sharkssl-client ${CLIENT_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-sharkssl-client tlslib-sharkssl)
+## 
+## add_executable(${PROJECT_NAME}-sharkssl-server ${SERVER_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-sharkssl-server tlslib-sharkssl)
+## 
+## # ------------------------------------------------------------------------------
+
+
+# CONFIG FILE GENERATION
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/crazywolf/Environment.h.in ${CMAKE_BINARY_DIR}/include/crazywolf/Environment.h)

@@ -1,10 +1,9 @@
-
 //==============================================================================
 ///
-/// @file Client.c
+/// @file client.c
 ///
 ///
-/// @brief A test TLS client using several TLS libraries.
+/// @brief A test TLS client using wolfSSL library.
 ///
 /// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
 /// All rights reserved.
@@ -14,7 +13,6 @@
 // Include files
 //------------------------------------------------------------------------------
 #include <stdio.h>
-#include <stdbool.h>
 #include <limits.h>
 #include <fcntl.h>
 
@@ -25,12 +23,12 @@
 #include <arpa/inet.h>
 #endif
 
-
 #include <crazywolf/Common.h>
 #include <crazywolf/Tlslib.h>
-#include <crazywolf/Platform.h>
 #include <crazywolf/Environment.h> // Generated header, look into CMake.
 
+// wolfSSL
+#include <wolfssl/ssl.h>
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -50,40 +48,12 @@
 // Local constants
 //-----------------------------------------------------------------------------
 
+char cw_Tlslib_errBuffer[2048] = {0};
+
 //-----------------------------------------------------------------------------
 // Global references
 //-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-// Forward function declarations
-//-----------------------------------------------------------------------------
-
-static int cw_Client_TcpConnect(int* pSocket,
-                                const char* pIp,
-                                uint16_t port);
-
-static int cw_Client_TlsClient(char* pSrvIP,
-                               uint16_t port,
-                               char* pCertDirPath);
-
-//-----------------------------------------------------------------------------
-// Variable definitions
-//-----------------------------------------------------------------------------
-
-typedef union
-{
-    struct
-    {
-        uint16_t payloadBytesBe;
-        uint8_t payload[UINT16_MAX];
-        uint8_t zero;
-    } str;
-
-    uint8_t msg[UINT16_MAX + sizeof(uint16_t) + sizeof(uint8_t)];
-} Msg_t;
-
-static Msg_t cw_Client_msg;
-static char cw_Client_errBuffer[4096];
 
 //-----------------------------------------------------------------------------
 // Function definitions
@@ -92,35 +62,79 @@ static char cw_Client_errBuffer[4096];
 
 //-----------------------------------------------------------------------------
 ///
-/// @brief init connection socket
-///
-/// @param[out] pSocket - pointer to socket
-/// @param[in] pIp - server IP address
-/// @param[in] port - port
-///
-/// @return 0 on success
+/// @brief Init security library.
 ///
 //-----------------------------------------------------------------------------
-static int cw_Client_TcpConnect(int* pSocket, const char* pIp, uint16_t port)
+void CW_Tlslib_Startup(void)
 {
-    *pSocket = CW_Platform_Socket(true);
+#if defined(CW_ENV_DEBUG_ENABLE)
+    wolfSSL_Debugging_ON();
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
-    if (*pSocket == -1) // INVALID_SOCKET undef in Unix
+    wolfSSL_Init();
+} // End: CW_Lib_Startup()
+
+void* CW_Tlslib_CreateSecureContext(void)
+{
+    WOLFSSL_METHOD* pMethod = wolfTLSv1_2_client_method();
+    if (pMethod == NULL)
     {
-        CW_Common_Die("can't get socket");
+        CW_Common_Die("wolf method error");
     }
 
-    if (CW_Platform_Connect(*pSocket, CW_Platform_GetIp4Addr(pIp), port) == -1)
+    WOLFSSL_CTX* pCtx = wolfSSL_CTX_new(pMethod);
+    if (pCtx == NULL)
     {
-        CW_Common_Die("socket connect failed");
+        CW_Common_Die("wolf ctx error");
     }
 
-    return 0;
-} // End: cw_Client_TcpConnect()
+    if (wolfSSL_CTX_load_verify_locations(pCtx, "cert.pem", 0) != WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("invalid cert path");
+    }
 
+    // TODO check if exists first or try others if fails?
+    if (!wolfSSL_CTX_set_cipher_list(pCtx, "ECDHE-ECDSA-AES128-SHA256"))
+    {
+        CW_Common_Die("wolf cipher list error");
+    }
 
-static void cw_Client_WolfConnect(WOLFSSL* pSsl)
+    return pCtx;
+}
+
+void* CW_Tlslib_MakeSocketSecure(int socket, void* pSecureCtx)
 {
+    WOLFSSL_CTX* pCtx = (WOLFSSL_CTX*)pSecureCtx;
+    WOLFSSL* pSsl = wolfSSL_new(pCtx);
+    if (pSsl == NULL)
+    {
+        CW_Common_Die("wolf ssl error");
+    }
+
+    if (wolfSSL_set_fd(pSsl, socket) != WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("wolf set_fd error");
+    }
+
+    return (void*)pSsl;
+}
+
+void CW_Tlslib_UnmakeSocketSecure(int socket, void* pSocketSecureCtx)
+{
+    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    wolfSSL_shutdown(pSsl);
+    wolfSSL_free(pSsl);
+}
+
+void CW_Tlslib_DestroySecureContext(void* pSecureCtx)
+{
+    WOLFSSL_CTX* pCtx = (WOLFSSL_CTX*)pSecureCtx;
+    wolfSSL_CTX_free(pCtx);
+}
+
+void CW_TlsLib_Handshake(void* pCtx)
+{
+    WOLFSSL* pSsl = (WOLFSSL*)pCtx;
     int ret = 0;
     int err = 0;
     do {
@@ -139,6 +153,98 @@ static void cw_Client_WolfConnect(WOLFSSL* pSsl)
         CW_Common_Die("ssl connect failed");
     }
 }
+
+
+void CW_Tlslib_SendAll(int socket,
+                       void* pSocketSecureCtx,
+                       uint8_t* pData,
+                       size_t dataBytes)
+{
+    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    int err = 0;
+    uint32_t offset = 0;
+    while (offset < dataBytes)
+    {
+        do
+        {
+            int ret = wolfSSL_write(pSsl,
+                                    pData + offset,
+                                    dataBytes - offset);
+            if (ret <= 0)
+            {
+                err = wolfSSL_get_error(pSsl, 0);
+            }
+            else
+            {
+                offset += ret;
+            }
+        } while (err == WC_PENDING_E);
+    }
+} // End: CW_Tlslib_SendAll()
+
+
+void CW_Tlslib_SendOneByOneByte(int socket,
+                                void* pSocketSecureCtx,
+                                uint8_t* pData,
+                                size_t dataBytes)
+{
+    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    int err = 0;
+    uint32_t offset = 0;
+    while (offset < dataBytes)
+    {
+        do
+        {
+#if defined(CW_ENV_DEBUG_ENABLE)
+            printf("Sending %u / %u: %c (%02x)\n",
+                   offset+1, dataBytes,
+                   pData[offset],
+                   pData[offset]);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
+            int ret = wolfSSL_write(pSsl, &pData[offset], 1);
+            if (ret <= 0)
+            {
+                err = wolfSSL_get_error(pSsl, 0);
+                offset = dataBytes;
+            }
+            else
+            {
+                offset += 1;
+            }
+        } while (err == WC_PENDING_E);
+    }
+} // End: CW_Tlslib_SendOneByOneByte()
+
+
+void CW_Tlslib_SendAllInOne(int socket,
+                            void* pSocketSecureCtx,
+                            uint8_t* pData,
+                            size_t dataBytes)
+{
+    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+
+    int ret = wolfSSL_write(pSsl, pData, dataBytes);
+    if (ret != dataBytes)
+    {
+        int err = wolfSSL_get_error(pSsl, 0);
+#if defined(CW_ENV_DEBUG_ENABLE)
+        printf("ssl write error %d, %s\n", err,
+               wolfSSL_ERR_error_string(err, cw_Tlslib_errBuffer));
+#endif // defined(CW_ENV_DEBUG_ENABLE)
+        CW_Common_Die("Wolfssl ERROR!");
+    }
+} // End: CW_Tlslib_SendOneByOneByte()
+
+
+//-----------------------------------------------------------------------------
+///
+/// @brief Shut the security library down.
+///
+//-----------------------------------------------------------------------------
+void CW_Tlslib_Shutdown(void)
+{
+    wolfSSL_Cleanup();
+} // End: CW_Lib_Shutdown()
 
 
 static void cw_Client_WolfSendHappy(WOLFSSL* pSsl)
@@ -286,11 +392,8 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 
     printf("Server %s:%d connected\n", pSrvIP, port);
 
-    void* pSecureCtx = CW_Tlslib_CreateSecureContext();
 
-    void* pSecureSocketCtx = CW_Tlslib_MakeSocketSecure(socket, pSecureCtx);
-
-    CW_TlsLib_Handshake(pSecureSocketCtx);
+    cw_Client_WolfConnect(pSsl);
 
     // large buffers allocated on heap
     static char errBuffer[WOLFSSL_MAX_ERROR_SZ];
@@ -349,39 +452,4 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
     CloseSocket(socket);
     return 0;
 } // End: cw_Client_TlsClient()
-
-
-//------------------------------------------------------------------------------
-///
-/// @brief Entry point for the simple SSL Client
-///
-//------------------------------------------------------------------------------
-int main(int argc, char** argv)
-{
-    CW_Platform_Startup();
-    CW_Tlslib_Startup();
-
-    uint16_t port = SIMPLE_SSL_PORT;
-    char* pServerIP = SIMPLE_SSL_SERVER_ADDR;
-    char* pCertPath = SIMPLE_SSL_CERT_PATH;
-
-    if (argc == 2)
-    {
-        // use argv[1] as server IP
-        pServerIP = argv[1];
-    }
-    else
-    {
-        // tell user, server IP can be set
-        printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIP);
-    }
-
-    int result = 1;
-    result = cw_Client_TlsClient(pServerIP, port, pCertPath);
-
-    CW_Tlslib_Shutdown();
-    CW_Platform_Shutdown();
-
-    return result;
-} // End: main()
 
