@@ -224,3 +224,10 @@ uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str)
     InetPton(AF_INET, pIp4Str, &addr);
     return addr;
 }
+
+
+void CW_Platform_FlushStdout(void)
+{
+    fflush(stdout);
+}
+

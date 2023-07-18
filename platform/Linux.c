@@ -147,6 +147,11 @@ void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
     }
 }
 
+void CW_Platform_FlushStdout(void)
+{
+    fflush(stdout);
+}
+
 
 //-----------------------------------------------------------------------------
 //
