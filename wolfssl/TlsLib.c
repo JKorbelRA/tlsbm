@@ -286,14 +286,14 @@ void CW_TlsLib_SendAll(int sd,
 {
     WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     int err = 0;
-    uint32_t offset = 0;
+    int offset = 0;
     while (offset < dataBytes)
     {
         do
         {
             int ret = wolfSSL_write(pSsl,
                                     pData + offset,
-                                    dataBytes - offset);
+                                    (int)dataBytes - offset);
             if (ret <= 0)
             {
                 err = wolfSSL_get_error(pSsl, 0);
@@ -326,8 +326,9 @@ void CW_TlsLib_SendOneByOneByte(int sd,
         do
         {
 #if defined(CW_ENV_DEBUG_ENABLE)
-            printf("Sending %u / %u: %c (%02x)\n",
-                   offset+1, dataBytes,
+            printf("Sending %u / %zu: %c (%02x)\n",
+                   offset+1,
+                   dataBytes,
                    pData[offset],
                    pData[offset]);
 #endif // defined(CW_ENV_DEBUG_ENABLE)
@@ -358,7 +359,7 @@ void CW_TlsLib_SendAllInOne(int sd,
 {
     WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
 
-    int ret = wolfSSL_write(pSsl, pData, dataBytes);
+    int ret = wolfSSL_write(pSsl, pData, (int)dataBytes);
     if (ret != dataBytes)
     {
         int err = wolfSSL_get_error(pSsl, 0);
@@ -391,7 +392,7 @@ int CW_TlsLib_Recv(int sd,
     do
     {
         err = 0;
-        int ret = wolfSSL_read(pSsl, pData + offset, dataBytes - offset);
+        int ret = wolfSSL_read(pSsl, pData + offset, (int)dataBytes - offset);
         if (ret <= 0)
         {
             err = wolfSSL_get_error(pSsl, 0);

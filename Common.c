@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <malloc.h>
 
 #include <crazywolf/Common.h>
 
@@ -72,7 +73,7 @@ void CW_Common_Allocaprint(uint8_t* pAlloca,
         ; // just count
     }
 
-    printf("Stack consumed %d\n", stackMaxBytes-freeStack);
+    printf("Stack consumed %zu\n", stackMaxBytes-freeStack);
 } // End: CW_Common_Allocaprint()
 
 //-----------------------------------------------------------------------------

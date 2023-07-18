@@ -20,14 +20,6 @@
 #include <string.h>
 
 
-#ifdef WIN32
-#include <ws2tcpip.h>
-#else
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
-
-
 #include <crazywolf/Common.h>
 #include <crazywolf/TlsLib.h>
 #include <crazywolf/Platform.h>
@@ -293,6 +285,9 @@ int main(int argc, char** argv)
     CW_Platform_Startup();
     CW_TlsLib_Startup();
 
+    size_t stackMaxBytes = 50*1000;
+    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
+
     uint16_t port = SIMPLE_SSL_PORT;
     char* pServerIP = SIMPLE_SSL_SERVER_ADDR;
     char* pCertPath = SIMPLE_SSL_CERT_PATH;
@@ -309,6 +304,8 @@ int main(int argc, char** argv)
     }
 
     int result = cw_Client_TlsClient(pServerIP, port, pCertPath);
+
+    CW_Common_Allocaprint(pAlloca, stackMaxBytes);
 
     CW_TlsLib_Shutdown();
     CW_Platform_Shutdown();
