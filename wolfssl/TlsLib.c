@@ -259,7 +259,6 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
         }
     } while (err == WC_PENDING_E);
 
-    ret = 0;
     if (ret != WOLFSSL_SUCCESS)
     {
 #if defined(CW_ENV_DEBUG_ENABLE)
@@ -271,7 +270,7 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
     }
 
 
-    return ret;
+    return (ret != WOLFSSL_SUCCESS) ? -1 : 0;
 } // End: CW_TlsLib_ServerHandshake()
 
 
