@@ -117,7 +117,7 @@ static void cw_Client_SendTestMsg(int sd,
                                   size_t dataBytes,
                                   uint8_t flags)
 {
-    cw_Client_msg.str.payloadBytesBe = htons((uint16_t)dataBytes);
+    cw_Client_msg.str.payloadBytesBe = CW_Platform_Htons((uint16_t)dataBytes);
     cw_Client_msg.str.zero = 0;
     memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
