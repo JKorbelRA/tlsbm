@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 
 
 #include <crazywolf/Common.h>
@@ -78,6 +80,10 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
                                uint16_t port,
                                char* pCertDirPath)
 {
+
+    size_t stackMaxBytes = 50*1000;
+    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
+
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          "caCert.pem",
                                                          TLSLIB_FILE_TYPE_PEM,
@@ -118,20 +124,21 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
 
         while (res == 0)
         {
+            uint16_t payloadBytesBe = 0;
             res = CW_TlsLib_Recv(sd,
                                  pSecureSocketCtx,
-                                 (uint8_t*)&cw_Server_inMsg.str.payloadBytesBe,
+                                 (uint8_t*)&payloadBytesBe,
                                  2);
             if (res == 0)
             {
-                size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inMsg.str.payloadBytesBe);
+                size_t payloadBytes = CW_Platform_Ntohs(payloadBytesBe);
                 res = CW_TlsLib_Recv(sd,
                                      pSecureSocketCtx,
-                                     (uint8_t*)&cw_Server_inMsg.str.payloadBytesBe,
+                                     (uint8_t*)&cw_Server_inMsg.str.payload,
                                      payloadBytes);
                 if (res == 0)
                 {
-                    printf("Msg size: %d\nMsg:\n%s",
+                    printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
                            (const char*)cw_Server_inMsg.str.payload);
                 }
@@ -149,6 +156,8 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
         CW_Platform_CloseSocket(sd);
+
+        CW_Common_Allocaprint(pAlloca, stackMaxBytes);
     }
 
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
@@ -164,6 +173,7 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
 //------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+
     CW_Platform_Startup();
     CW_TlsLib_Startup();
 
@@ -179,6 +189,7 @@ int main(int argc, char** argv)
     uint32_t ip4Addr = 0;
 
     int result = cw_Server_TlsServer(ip4Addr, port, pCertPath);
+
 
     CW_TlsLib_Shutdown();
     CW_Platform_Shutdown();

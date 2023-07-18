@@ -14,6 +14,9 @@
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 #include <crazywolf/Common.h>
 
@@ -48,6 +51,29 @@
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
+
+
+
+uint8_t* CW_Common_Allocacheck(size_t stackMaxBytes)
+{
+    uint8_t* pAlloca = alloca(stackMaxBytes);
+    memset(pAlloca, 0xccU, stackMaxBytes);
+    return pAlloca;
+} // End: CW_Common_Allocacheck()
+
+void CW_Common_Allocaprint(uint8_t* pAlloca,
+                           size_t stackMaxBytes)
+{
+    size_t freeStack = 0;
+    for (;
+         freeStack < stackMaxBytes && pAlloca[freeStack] == 0xcc;
+         freeStack++)
+    {
+        ; // just count
+    }
+
+    printf("Stack consumed %d\n", stackMaxBytes-freeStack);
+} // End: CW_Common_Allocaprint()
 
 //-----------------------------------------------------------------------------
 ///
