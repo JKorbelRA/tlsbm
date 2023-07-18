@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 
 
 #include <crazywolf/Common.h>
@@ -47,7 +48,9 @@
 // Forward function declarations
 //------------------------------------------------------------------------------
 
-static int cw_Server_TlsServer(uint16_t port, char* pCertDirPath);
+static int cw_Server_TlsServer(uint32_t ip4Addr,
+                               uint16_t port,
+                               char* pCertDirPath);
 
 
 //------------------------------------------------------------------------------

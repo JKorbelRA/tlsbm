@@ -17,6 +17,8 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <string.h>
+
 
 #ifdef WIN32
 #include <ws2tcpip.h>

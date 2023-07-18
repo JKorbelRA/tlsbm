@@ -126,7 +126,8 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                              pDevCertPath,
                                              format) != WOLFSSL_SUCCESS)
         {
-            CW_Common_Die("Device cert load error: %s", pDevCertPath);
+            printf("Device cert load error: %s", pDevCertPath);
+            CW_Common_Die("");
         }
     }
     else
@@ -140,7 +141,8 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
         if (wolfSSL_CTX_use_PrivateKey_file(pCtx, pDevKeyPath, format) != WOLFSSL_SUCCESS)
         {
-            CW_Common_Die("Device key load error: %s", pDevKeyPath);
+            printf("Device key load error: %s", pDevKeyPath);
+            CW_Common_Die("");
         }
     }
     else
