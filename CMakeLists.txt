@@ -25,6 +25,12 @@ set(SERVER_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/Common.c
 )
 
+if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+    list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Linux.c)
+elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
+    list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Windows.c)
+endif()
+
 # INCLUDES
 
 include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -33,11 +39,11 @@ include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/incl
 
 add_subdirectory(wolfssl)
 
-add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
+add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC} ${COMMON_SRC})
 
 target_link_libraries(${PROJECT_NAME}-wolfssl-client tlslib-wolfssl)
 
-add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
+add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC} ${COMMON_SRC})
 
 target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
 
@@ -45,11 +51,11 @@ target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
 ## 
 ## add_subdirectory(mbedtls)
 ## 
-## add_executable(${PROJECT_NAME}-mbedtls-client ${CLIENT_SRC})
+## add_executable(${PROJECT_NAME}-mbedtls-client ${CLIENT_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-mbedtls-client tlslib-mbedtls)
 ## 
-## add_executable(${PROJECT_NAME}-mbedtls-server ${SERVER_SRC})
+## add_executable(${PROJECT_NAME}-mbedtls-server ${SERVER_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-mbedtls-server tlslib-mbedtls)
 ## 
@@ -58,11 +64,11 @@ target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
 ## 
 ## add_subdirectory(cyclonessl)
 ## 
-## add_executable(${PROJECT_NAME}-cyclonessl-client ${CLIENT_SRC})
+## add_executable(${PROJECT_NAME}-cyclonessl-client ${CLIENT_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-cyclonessl-client tlslib-cyclonessl)
 ## 
-## add_executable(${PROJECT_NAME}-cyclonessl-server ${SERVER_SRC})
+## add_executable(${PROJECT_NAME}-cyclonessl-server ${SERVER_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-cyclonessl-server tlslib-cyclonessl)
 ## 
@@ -72,11 +78,11 @@ target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
 ## 
 ## add_subdirectory(sharkssl)
 ## 
-## add_executable(${PROJECT_NAME}-sharkssl-client ${CLIENT_SRC})
+## add_executable(${PROJECT_NAME}-sharkssl-client ${CLIENT_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-sharkssl-client tlslib-sharkssl)
 ## 
-## add_executable(${PROJECT_NAME}-sharkssl-server ${SERVER_SRC})
+## add_executable(${PROJECT_NAME}-sharkssl-server ${SERVER_SRC} ${COMMON_SRC})
 ## 
 ## target_link_libraries(${PROJECT_NAME}-sharkssl-server tlslib-sharkssl)
 ## 

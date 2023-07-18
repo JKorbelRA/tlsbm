@@ -27,7 +27,7 @@
 
 
 #include <crazywolf/Common.h>
-#include <crazywolf/Tlslib.h>
+#include <crazywolf/TlsLib.h>
 #include <crazywolf/Platform.h>
 #include <crazywolf/Environment.h> // Generated header, look into CMake.
 
@@ -70,20 +70,8 @@ static int cw_Client_TlsClient(char* pSrvIP,
 // Variable definitions
 //-----------------------------------------------------------------------------
 
-typedef union
-{
-    struct
-    {
-        uint16_t payloadBytesBe;
-        uint8_t payload[UINT16_MAX];
-        uint8_t zero;
-    } str;
-
-    uint8_t msg[UINT16_MAX + sizeof(uint16_t) + sizeof(uint8_t)];
-} Msg_t;
 
 static Msg_t cw_Client_msg;
-static char cw_Client_errBuffer[4096];
 
 //-----------------------------------------------------------------------------
 // Function definitions
@@ -92,9 +80,9 @@ static char cw_Client_errBuffer[4096];
 
 //-----------------------------------------------------------------------------
 ///
-/// @brief init connection socket
+/// @brief init connection sd
 ///
-/// @param[out] pSocket - pointer to socket
+/// @param[out] pSocket - pointer to sd
 /// @param[in] pIp - server IP address
 /// @param[in] port - port
 ///
@@ -107,134 +95,49 @@ static int cw_Client_TcpConnect(int* pSocket, const char* pIp, uint16_t port)
 
     if (*pSocket == -1) // INVALID_SOCKET undef in Unix
     {
-        CW_Common_Die("can't get socket");
+        CW_Common_Die("can't get sd");
     }
 
     if (CW_Platform_Connect(*pSocket, CW_Platform_GetIp4Addr(pIp), port) == -1)
     {
-        CW_Common_Die("socket connect failed");
+        CW_Common_Die("sd connect failed");
     }
 
     return 0;
 } // End: cw_Client_TcpConnect()
 
 
-static void cw_Client_WolfConnect(WOLFSSL* pSsl)
-{
-    int ret = 0;
-    int err = 0;
-    do {
-        err = 0;
-        ret = wolfSSL_connect(pSsl);
-        if (ret != WOLFSSL_SUCCESS) {
-            err = wolfSSL_get_error(pSsl, 0);
-        }
-    } while (err == WC_PENDING_E);
-
-
-    if (ret != WOLFSSL_SUCCESS)
-    {
-        printf("ssl connect error %d, %s\n", err,
-            wolfSSL_ERR_error_string(err, cw_Client_errBuffer));
-        CW_Common_Die("ssl connect failed");
-    }
-}
-
-
-static void cw_Client_WolfSendHappy(WOLFSSL* pSsl)
-{
-    uint32_t msgBytes = ntohs(cw_Client_msg.str.payloadBytesBe) + 2;
-
-    int err = 0;
-    uint32_t offset = 0;
-    while (offset < msgBytes)
-    {
-        do
-        {
-            int ret = wolfSSL_write(pSsl,
-                                    cw_Client_msg.msg + offset,
-                                    msgBytes - offset);
-            if (ret <= 0)
-            {
-                err = wolfSSL_get_error(pSsl, 0);
-            }
-            else
-            {
-                offset += ret;
-            }
-        } while (err == WC_PENDING_E);
-    }
-}
-
-
-static void cw_Client_WolfSend1by1(WOLFSSL* pSsl)
-{
-    uint32_t msgBytes = ntohs(cw_Client_msg.str.payloadBytesBe) + 2;
-
-    int err = 0;
-    uint32_t offset = 0;
-
-    while (offset < msgBytes)
-    {
-        do
-        {
-            printf("Sending %u / %u: %c (%02x)\n", offset+1, msgBytes, cw_Client_msg.msg[offset], cw_Client_msg.msg[offset]);
-            int ret = wolfSSL_write(pSsl, &cw_Client_msg.msg[offset], 1);
-            if (ret <= 0)
-            {
-                err = wolfSSL_get_error(pSsl, 0);
-                offset = msgBytes;
-            }
-            else
-            {
-                offset += 1;
-            }
-        } while (err == WC_PENDING_E);
-    }
-}
-
-
-static void cw_Client_WolfSendErrorNow(WOLFSSL* pSsl)
-{
-    int msgBytes = ntohs(cw_Client_msg.str.payloadBytesBe) + 2;
-
-    int ret = wolfSSL_write(pSsl, cw_Client_msg.msg, msgBytes);
-    if (ret != msgBytes)
-    {
-        int err = wolfSSL_get_error(pSsl, 0);
-        printf("ssl write error %d, %s\n", err,
-            wolfSSL_ERR_error_string(err, cw_Client_errBuffer));
-        CW_Common_Die("Wolfssl ERROR!");
-    }
-}
-
 #define CW_CLIENT_FLAG_NO_BASIC 0x01
 #define CW_CLIENT_FLAG_NO_1BY1 0x02
 #define CW_CLIENT_FLAG_NO_ATONCE 0x04
 
 #define CW_CLIENT_TESTSTR(payload, flags)\
-    cw_Client_SendTestMsg(pSsl, sizeof(payload) - 1, payload, flags)
+    cw_Client_SendTestMsg(sd, pSocketSecureCtx, sizeof(payload) - 1, payload, flags)
 #define CW_CLIENT_TESTMSG(payloadBytes, payload, flags)\
-    cw_Client_SendTestMsg(pSsl, payloadBytes, payload, flags)
+    cw_Client_SendTestMsg(sd, pSocketSecureCtx, payloadBytes, payload, flags)
 
 
-static void cw_Client_SendTestMsg(WOLFSSL* pSsl,
-                                  uint16_t payloadBytes,
-                                  const char* pPayload,
+static void cw_Client_SendTestMsg(int sd,
+                                  void* pSocketSecureCtx,
+                                  uint8_t* pData,
+                                  size_t dataBytes,
                                   uint8_t flags)
 {
-    cw_Client_msg.str.payloadBytesBe = htons(payloadBytes);
+    cw_Client_msg.str.payloadBytesBe = htons(dataBytes);
     cw_Client_msg.str.zero = 0;
-    memcpy(cw_Client_msg.str.payload, pPayload, payloadBytes);
+    memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
     printf("Testing following message (%u bytes):\n%s\n",
-           payloadBytes,
-           pPayload);
+           dataBytes,
+           pData);
 
     if ((flags & CW_CLIENT_FLAG_NO_BASIC) == 0)
     {
         printf("Basic test running.\n");
-        cw_Client_WolfSendHappy(pSsl);
+        CW_TlsLib_SendAll(sd,
+                          pSocketSecureCtx,
+                          cw_Client_msg.str.payload,
+                          CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("Basic test DONE.\n");
     }
     else
@@ -245,7 +148,10 @@ static void cw_Client_SendTestMsg(WOLFSSL* pSsl,
     if ((flags & CW_CLIENT_FLAG_NO_1BY1) == 0)
     {
         printf("1-by-1 test running.\n");
-        cw_Client_WolfSend1by1(pSsl);
+        CW_TlsLib_SendOneByOneByte(sd,
+                                   pSocketSecureCtx,
+                                   cw_Client_msg.str.payload,
+                                   CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("1-by-1 test DONE.\n");
     }
     else
@@ -256,7 +162,10 @@ static void cw_Client_SendTestMsg(WOLFSSL* pSsl,
     if ((flags & CW_CLIENT_FLAG_NO_ATONCE) == 0)
     {
         printf("All-at-once test running.\n");
-        cw_Client_WolfSendErrorNow(pSsl);
+        CW_TlsLib_SendAllInOne(sd,
+                               pSocketSecureCtx,
+                               cw_Client_msg.str.payload,
+                               CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("All-at-once test DONE.\n");
     }
     else
@@ -278,26 +187,29 @@ static void cw_Client_SendTestMsg(WOLFSSL* pSsl,
 static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 {
     printf("Connecting server\n");
-    int socket = 0;
-    if (cw_Client_TcpConnect(&socket, pSrvIP, port))
+    int sd = 0;
+    if (cw_Client_TcpConnect(&sd, pSrvIP, port))
     {
         CW_Common_Die("can't connect to server");
     }
 
     printf("Server %s:%d connected\n", pSrvIP, port);
 
-    void* pSecureCtx = CW_Tlslib_CreateSecureContext();
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                         "caCert.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devCert.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devKey.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "ECDHE-ECDSA-AES128-SHA256");
 
-    void* pSecureSocketCtx = CW_Tlslib_MakeSocketSecure(socket, pSecureCtx);
+    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_Handshake(pSecureSocketCtx);
 
-    // large buffers allocated on heap
-    static char errBuffer[WOLFSSL_MAX_ERROR_SZ];
-
 
     // Let's test!
-
     printf("Test case 0: Mic test\n");
     CW_CLIENT_TESTSTR("Hi", 0);
     CW_CLIENT_TESTSTR("Hello", 0);
@@ -319,47 +231,64 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
     }
 
     printf("\t HAPPY\n");
-    cw_Client_WolfSendHappy(pSsl);
+    CW_TlsLib_SendAll(sd,
+                      pSecurityCtx,
+                      cw_Client_msg.str.payload,
+                      CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t one-by-one\n");
-    cw_Client_WolfSend1by1(pSsl);
+    CW_TlsLib_SendOneByOneByte(sd,
+                               pSecurityCtx,
+                               cw_Client_msg.str.payload,
+                               CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t at once!\n");
-    cw_Client_WolfSendErrorNow(pSsl);
+    CW_TlsLib_SendAllInOne(sd,
+                           pSecurityCtx,
+                           cw_Client_msg.str.payload,
+                           CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t DONE!\n");
 
     printf("Test case 3: Zeroes and newlines\n");
-    cw_Client_msg.str.payloadBytesBe = htons(4);
+    cw_Client_msg.str.payloadBytesBe = CW_Platform_Htons(4);
     cw_Client_msg.str.payload[0] = '0';
     cw_Client_msg.str.payload[1] = '\0';
     cw_Client_msg.str.payload[2] = 'n';
     cw_Client_msg.str.payload[3] = '\n';
 
     printf("\t HAPPY\n");
-    cw_Client_WolfSendHappy(pSsl);
+    CW_TlsLib_SendAll(sd,
+                      pSecurityCtx,
+                      cw_Client_msg.str.payload,
+                      CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t one-by-one\n");
-    cw_Client_WolfSend1by1(pSsl);
+    CW_TlsLib_SendOneByOneByte(sd,
+                               pSecurityCtx,
+                               cw_Client_msg.str.payload,
+                               CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t at once!\n");
-    cw_Client_WolfSendErrorNow(pSsl);
+    CW_TlsLib_SendAllInOne(sd,
+                           pSecurityCtx,
+                           cw_Client_msg.str.payload,
+                           CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t DONE!\n");
 
 
-    wolfSSL_shutdown(pSsl);
-    wolfSSL_free(pSsl);
-    wolfSSL_CTX_free(pCtx);
+    CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
+    CW_TlsLib_DestroySecureContext(pSecurityCtx);
+    CW_Platform_CloseSocket(sd);
 
-    CloseSocket(socket);
     return 0;
 } // End: cw_Client_TlsClient()
 
 
 //------------------------------------------------------------------------------
 ///
-/// @brief Entry point for the simple SSL Client
+/// @brief Entry point for the simple TLS Client
 ///
 //------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
     CW_Platform_Startup();
-    CW_Tlslib_Startup();
+    CW_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;
     char* pServerIP = SIMPLE_SSL_SERVER_ADDR;
@@ -376,10 +305,9 @@ int main(int argc, char** argv)
         printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIP);
     }
 
-    int result = 1;
-    result = cw_Client_TlsClient(pServerIP, port, pCertPath);
+    int result = cw_Client_TlsClient(pServerIP, port, pCertPath);
 
-    CW_Tlslib_Shutdown();
+    CW_TlsLib_Shutdown();
     CW_Platform_Shutdown();
 
     return result;

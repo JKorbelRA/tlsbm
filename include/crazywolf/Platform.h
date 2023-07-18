@@ -14,6 +14,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 
 //-----------------------------------------------------------------------------
@@ -30,5 +31,15 @@ void CW_Platform_Startup(void);
 ///
 //-----------------------------------------------------------------------------
 void CW_Platform_Shutdown(void);
+
+int CW_Platform_Socket(bool isStream);
+int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port);
+void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port);
+int CW_Platform_Accept(int listenSd);
+void CW_Platform_CloseSocket(int sd);
+uint16_t CW_Platform_Htons(uint16_t hostNum);
+uint16_t CW_Platform_Ntohs(uint16_t networkNum);
+uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str);
+
 
 #endif // !defined(CW_PLATFORM_H)

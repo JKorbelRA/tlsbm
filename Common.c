@@ -13,14 +13,6 @@
 // Include files
 //------------------------------------------------------------------------------
 #include <stdio.h>
-
-#ifdef WIN32
-#include <ws2tcpip.h>
-#else
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
-
 #include <stdlib.h>
 
 #include "Common.h"

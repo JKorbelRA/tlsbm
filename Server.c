@@ -1,11 +1,11 @@
 //==============================================================================
 ///
-/// @file server.c
+/// @file Server.c
 ///
 ///
 /// @brief A test TLS server using wolfsSLL library.
 ///
-/// Copyright (c) 2022 Rockwell Automation Technologies, Inc.
+/// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
 /// All rights reserved.
 //==============================================================================
 
@@ -17,18 +17,11 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#ifndef WIN32
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#else
-#include <winsock2.h>
-#include <ws2def.h>
-#endif
 
-// wolfSSL
-#include <wolfssl/ssl.h>
-#include "Common.h"
+#include <crazywolf/Common.h>
+#include <crazywolf/TlsLib.h>
+#include <crazywolf/Platform.h>
+#include <crazywolf/Environment.h> // Generated header, look into CMake.
 
 //------------------------------------------------------------------------------
 // Constants
@@ -54,243 +47,137 @@
 // Forward function declarations
 //------------------------------------------------------------------------------
 
+static int cw_Server_TlsServer(uint16_t port, char* pCertDirPath);
+
+
 //------------------------------------------------------------------------------
 // Variable definitions
 //------------------------------------------------------------------------------
+
+Msg_t cw_Server_inMsg;
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
 
-/// @brief init connection socket
-/// @param[out] pSocket - pointer to socket
-/// @param[in] port - port
-/// @return 0 on success
-
-int tcpListen(int* pSocket, uint16_t port)
+//------------------------------------------------------------------------------
+///
+///  @brief main client function, reads inputBuffer from stdin and send it to the SSL server
+///
+/// @param[in] port - comm port
+/// @param[in] pCertDirPath - path to certificates
+///
+/// @return return 0 on success
+///
+//------------------------------------------------------------------------------
+static int cw_Server_TlsServer(uint32_t ip4Addr,
+                               uint16_t port,
+                               char* pCertDirPath)
 {
-    *pSocket = (int)socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (*pSocket == -1) //INVALID_SOCKET undef on Unix
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
+                                                         "caCert.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devCert.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devKey.pem",
+                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "ECDHE-ECDSA-AES128-SHA256");
+
+
+    int listenSd = CW_Platform_Socket(true);
+    if (listenSd == -1) //INVALID_SOCKET undef on Unix
     {
         CW_Common_Die("can't create socket");
     }
 
-#ifdef WIN32
-    char on = 1;
-    int len = sizeof(on);
-    if (setsockopt(*pSocket, SOL_SOCKET, SO_REUSEADDR, &on, len) < 0)
-    {
-        CW_Common_Die("setsockopt SO_REUSEADDR failed");
-    }
-#endif
-
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
-
-    if (bind(*pSocket, (struct sockaddr*)&addr, sizeof(addr)) == -1) //SOCKET_ERROR  undef on Unix
-    {
-        CW_Common_Die("can't bind socket");
-    }
-
-    if (listen(*pSocket, SOMAXCONN) == -1) //SOCKET_ERROR undef on Unix
-    {
-        CW_Common_Die("can't listen to socket");
-    }
-
-    return 0;
-}// End: tcpListen()
-
-/// @brief readWolfSSLData, reads data of specified length
-/// @param[in] pSsl - wolfSSL session
-/// @param[out] pBuffer - data buffer - buffer size shoud be > then bytes to read
-/// @param[in] len - data length to read
-/// @param[out] pErrBuf - buffer for potential wolfSSL error message
-/// @return returns 0 if all required bytes read
-
-int readWolfSSLData(WOLFSSL* pSsl, char* pBuffer, int len, char* pErrBuffer)
-{
-    int offset = 0;
-    int err = 0;
-
-    // read while not [len] bytes read or some connection error
-    do {
-        err = 0;
-        int ret = wolfSSL_read(pSsl, pBuffer + offset, len - offset);
-        if (ret <= 0) {
-            err = wolfSSL_get_error(pSsl, 0);
-        }
-        else
-        {
-            offset += ret;
-        }
-    } while (offset < len &&
-        (err == 0 || err == WC_PENDING_E));
-
-    if (offset == len) {
-        return 0;
-    }
-    printf("wolfSSL read error %d, %s!\n", err, wolfSSL_ERR_error_string(err, pErrBuffer));
-    return 1;
-}
-
-
-/// @brief main client function, reads inputBuffer from stdin and send it to the SSL server
-/// @param[in] port - comm port
-/// @param[in] pCertDirPath - path to certificates
-/// @return return 0 on success
-
-int simpleSSLServer(uint16_t port, char* pCertDirPath)
-{
-    // wolfSSL init
-    WOLFSSL_METHOD* pMethod = wolfTLSv1_2_server_method();
-    if (pMethod == NULL)
-    {
-        CW_Common_Die("wolf method error");
-    }
-
-    WOLFSSL_CTX* pCtx = wolfSSL_CTX_new(pMethod);
-    if (pCtx == NULL)
-    {
-        CW_Common_Die("wolf ctx error");
-    }
-
-    if (!wolfSSL_CTX_set_cipher_list(pCtx, "ECDHE-ECDSA-AES128-SHA256"))
-    {
-        CW_Common_Die("wolf cipher list error");
-    }
-
-    //large buffers allocated on heap
-    static char certFile[MAX_PATH];
-
-    snprintf(certFile, sizeof(certFile), "%s/ca-ecc-cert.pem", pCertDirPath);
-
-    if (wolfSSL_CTX_load_verify_locations(pCtx, certFile, 0) != WOLFSSL_SUCCESS)
-    {
-        CW_Common_Die("load ca-ecc-cert.pem error");
-    }
-
-    snprintf(certFile, sizeof(certFile), "%s/server-ecc.pem", pCertDirPath);
-
-    if (wolfSSL_CTX_use_certificate_file(pCtx, certFile, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
-    {
-        CW_Common_Die("load server-ecc.pem error");
-    }
-
-    snprintf(certFile, sizeof(certFile), "%s/ecc-key.pem", pCertDirPath);
-
-    if (wolfSSL_CTX_use_PrivateKey_file(pCtx, certFile, WOLFSSL_FILETYPE_PEM) != WOLFSSL_SUCCESS)
-    {
-        CW_Common_Die("load ecc-key.pem error");
-    }
-
-    if (!wolfSSL_CTX_set_cipher_list(pCtx, "ECDHE-ECDSA-AES128-SHA256"))
-    {
-        CW_Common_Die("wolf cipher list error");
-    }
-
-    // bind to socket and wait for client requests
-    int socket = 0;
-    tcpListen(&socket, port);
+    CW_Platform_BindAndListen(listenSd, ip4Addr, port);
     printf("Simple SSL server started on port %d\n", port);
 
-    // wait for clients
-    int clientSocket = 0;
-    struct sockaddr_in  clientAddr;
-    int clientLen = sizeof(clientAddr);
-
-    //large buffers allocated on heap
-    static char errBuffer[WOLFSSL_MAX_ERROR_SZ];
-
-    while ((clientSocket = (int)accept(socket, (struct sockaddr*)&clientAddr, &clientLen)) != -1)
+    while (true)
     {
-        WOLFSSL* pSsl = wolfSSL_new(pCtx);
+        printf("Accepting new client\n");
+        int sd = CW_Platform_Accept(listenSd);
 
-        if (pSsl == NULL)
+        if (sd < 0)
         {
-            CW_Common_Die("wolf ssl error");
-        }
-
-        wolfSSL_set_fd(pSsl, clientSocket);
-
-        int ret = 0;
-        int err = 0;
-        do {
-            err = 0;
-            ret = wolfSSL_accept(pSsl);
-            if (ret != WOLFSSL_SUCCESS)
-            {
-                err = wolfSSL_get_error(pSsl, 0);
-            }
-        } while (err == WC_PENDING_E);
-        if (ret != WOLFSSL_SUCCESS) {
-            printf("wolf accept error = %d, %s\n", err, wolfSSL_ERR_error_string(err, errBuffer));
-            printf("wolf accept failed\n");
-            wolfSSL_free(pSsl);
-            CloseSocket(clientSocket);
             continue;
         }
-        printf("client accepted\n");
 
-        //large buffers allocated on heap
-        static char msgBuffer[USHRT_MAX + 2];
-        while (readWolfSSLData(pSsl, msgBuffer, 2, errBuffer) == 0)
+        void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
+
+        int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
+        if (res != 0)
         {
-            // get message size and read data
-            uint16_t msgLen = ntohs(*((uint16_t*)msgBuffer));
+            continue;
+        }
 
-            if (readWolfSSLData(pSsl, msgBuffer + 2, msgLen, errBuffer) == 0)
+        while (res == 0)
+        {
+            res = CW_TlsLib_Recv(sd,
+                                 pSecureSocketCtx,
+                                 (uint8_t*)&cw_Server_inMsg.str.payloadBytesBe,
+                                 2);
+            if (res == 0)
             {
-                msgBuffer[msgLen + 2] = '\0';
-                fprintf(stdout, "[%d] ", msgLen);
-                fprintf(stdout, "%s\n", msgBuffer + 2);
+                size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inMsg.str.payloadBytesBe);
+                res = CW_TlsLib_Recv(sd,
+                                     pSecureSocketCtx,
+                                     (uint8_t*)&cw_Server_inMsg.str.payloadBytesBe,
+                                     payloadBytes);
+                if (res == 0)
+                {
+                    printf("Msg size: %d\nMsg:\n%s",
+                           (int)payloadBytes,
+                           (const char*)cw_Server_inMsg.str.payload);
+                }
+                else
+                {
+                    printf("Recv payload failure\n");
+                }
             }
             else
             {
-                // message read failed
-                break;
+                printf("Recv hdr failure\n");
             }
         }
-        wolfSSL_shutdown(pSsl);
-        wolfSSL_free(pSsl);
-        CloseSocket(clientSocket);
+
+
+        CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
+        CW_Platform_CloseSocket(sd);
     }
 
-    CloseSocket(socket);
-    wolfSSL_CTX_free(pCtx);
+    CW_TlsLib_DestroySecureContext(pSecurityCtx);
 
     return 0;
-} // End: simpleSSLServer()
+} // End: cw_Server_TlsServer()
+
 
 //------------------------------------------------------------------------------
 ///
-/// @brief Entry point for the simple SSL Server
+/// @brief Entry point for the simple TLS Server
 ///
 //------------------------------------------------------------------------------
-
 int main(int argc, char** argv)
 {
-    short port = SIMPLE_SSL_PORT;
-    char* certPath = SIMPLE_SSL_CERT_PATH;
+    CW_Platform_Startup();
+    CW_TlsLib_Startup();
 
-    int result = 1;
+    uint16_t port = SIMPLE_SSL_PORT;
+    char* pCertPath = SIMPLE_SSL_CERT_PATH;
+
     // check args count
     if (argc > 1)
     {
         // TODO enable change port or something else?
     }
 
-#ifdef WIN32
-    WSADATA wsaData;
-    if (WSAStartup(0x0002, &wsaData) != NO_ERROR)
-    {
-        return 1;
-    }
-#endif // WIN32
-    wolfSSL_Init();
-    result = simpleSSLServer(port, certPath);
-    wolfSSL_Cleanup();
+    uint32_t ip4Addr = 0;
+
+    int result = cw_Server_TlsServer(ip4Addr, port, pCertPath);
+
+    CW_TlsLib_Shutdown();
+    CW_Platform_Shutdown();
+
     return result;
 } // End: main()
