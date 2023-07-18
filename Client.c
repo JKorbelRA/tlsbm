@@ -306,6 +306,7 @@ int main(int argc, char** argv)
     int result = cw_Client_TlsClient(pServerIP, port, pCertPath);
 
     CW_Common_Allocaprint(pAlloca, stackMaxBytes);
+    CW_Platform_FlushStdout();
 
     CW_TlsLib_Shutdown();
     CW_Platform_Shutdown();

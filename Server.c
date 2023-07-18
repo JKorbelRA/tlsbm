@@ -158,6 +158,7 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
         CW_Platform_CloseSocket(sd);
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);
+        CW_Platform_FlushStdout();
     }
 
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
