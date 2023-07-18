@@ -138,8 +138,8 @@ static void cw_Client_SendTestMsg(int sd,
         printf("Basic test running.\n");
         CW_TlsLib_SendAll(sd,
                           pSecureSocketCtx,
-                          cw_Client_msg.str.payload,
-                          CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
+                          cw_Client_msg.msg,
+                          dataBytes+2);
         printf("Basic test DONE.\n");
     }
     else
@@ -152,8 +152,8 @@ static void cw_Client_SendTestMsg(int sd,
         printf("1-by-1 test running.\n");
         CW_TlsLib_SendOneByOneByte(sd,
                                    pSecureSocketCtx,
-                                   cw_Client_msg.str.payload,
-                                   CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
+                                   cw_Client_msg.msg,
+                                   dataBytes+2);
         printf("1-by-1 test DONE.\n");
     }
     else
@@ -166,8 +166,8 @@ static void cw_Client_SendTestMsg(int sd,
         printf("All-at-once test running.\n");
         CW_TlsLib_SendAllInOne(sd,
                                pSecureSocketCtx,
-                               cw_Client_msg.str.payload,
-                               CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
+                               cw_Client_msg.msg,
+                               dataBytes+2);
         printf("All-at-once test DONE.\n");
     }
     else
@@ -214,6 +214,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
     // Let's test!
     printf("Test case 0: Mic test\n");
     CW_CLIENT_TESTSTR("Hi", 0);
+    /*
     CW_CLIENT_TESTSTR("Hello", 0);
     CW_CLIENT_TESTSTR("Testing Testing", 0);
 
@@ -272,7 +273,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
                            cw_Client_msg.str.payload,
                            CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
     printf("\t DONE!\n");
-
+*/
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
