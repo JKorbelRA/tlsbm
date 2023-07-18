@@ -125,12 +125,12 @@ static void cw_Client_SendTestMsg(int sd,
                                   size_t dataBytes,
                                   uint8_t flags)
 {
-    cw_Client_msg.str.payloadBytesBe = htons(dataBytes);
+    cw_Client_msg.str.payloadBytesBe = htons((uint16_t)dataBytes);
     cw_Client_msg.str.zero = 0;
     memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
     printf("Testing following message (%u bytes):\n%s\n",
-           dataBytes,
+           (unsigned int)dataBytes,
            pData);
 
     if ((flags & CW_CLIENT_FLAG_NO_BASIC) == 0)
@@ -202,8 +202,8 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          "devCert.pem",
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devKey.pem",
-                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devKey.der",
+                                                         TLSLIB_FILE_TYPE_DER,
                                                          "ECDHE-ECDSA-AES128-SHA256");
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);

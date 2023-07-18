@@ -71,7 +71,8 @@ void CW_Platform_Startup(void)
     int result = WSAStartup(0x0002, &wsaData);
     if (result != NO_ERROR)
     {
-        CW_Common_Die("WSAStartup failed with code %d. Exiting.", result);
+        printf("WSAStartup failed with code %d\n", result);
+        CW_Common_Die("Exiting");
     }
 }
 
@@ -86,7 +87,8 @@ void CW_Platform_Shutdown(void)
     int result = WSACleanup();
     if (result != NO_ERROR)
     {
-        CW_Common_Die("WSACleanup failed with code %d. Exiting.", result);
+        printf("WSACleanup failed with code %d.\n", result);
+        CW_Common_Die("Exiting.\n");
     }
 }
 
@@ -100,11 +102,11 @@ int CW_Platform_Socket(bool isStream)
 {
     if (isStream)
     {
-        return socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        return (int)socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     }
     else
     {
-        return socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        return (int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
 }
 
@@ -185,7 +187,7 @@ int CW_Platform_Accept(int listenSd)
 //-----------------------------------------------------------------------------
 void CW_Platform_CloseSocket(int sd)
 {
-    (void)close(sd);
+    (void)closesocket((SOCKET)sd);
 }
 
 
@@ -218,5 +220,7 @@ uint16_t CW_Platform_Ntohs(uint16_t networkNum)
 //-----------------------------------------------------------------------------
 uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str)
 {
-    return inet_addr(pIp4Str);
+    uint32_t addr = 0;
+    InetPton(AF_INET, pIp4Str, &addr);
+    return addr;
 }
