@@ -99,11 +99,8 @@ void CW_Common_Die(const char* pErrorMsg)
     exit(1);
 } // End: CW_Common_Die()
 
-void* CW_Common_Malloc(unsigned long size, void* heap, int type)
+void* CW_Common_Malloc(unsigned long size)
 {
-    (void)heap;
-    (void)type;
-
     char buf[64];
 
     void* pPtr = malloc(size);
@@ -119,11 +116,8 @@ void* CW_Common_Malloc(unsigned long size, void* heap, int type)
     return pPtr;
 }
 
-void* CW_Common_Realloc(void* ptr, unsigned long size, void* heap, int type)
+void* CW_Common_Realloc(void* ptr, unsigned long size)
 {
-    (void)heap;
-    (void)type;
-
     char buf[64];
 
     void* pPtr = realloc(ptr, size);
@@ -139,11 +133,8 @@ void* CW_Common_Realloc(void* ptr, unsigned long size, void* heap, int type)
     return pPtr;
 }
 
-void  CW_Common_Free(void* ptr, void* heap, int type)
+void  CW_Common_Free(void* ptr)
 {
-    (void)heap;
-    (void)type;
-
     char buf[64];
 
     free(ptr);

@@ -5,6 +5,7 @@ project(tlslib-wolfssl LANGUAGES C)
 # cmake minimum version
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
+add_definitions(-Wno-error=cpp)
 
 # require C99 standard
 set(C_STANDARD 99)

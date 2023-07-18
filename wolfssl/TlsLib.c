@@ -426,3 +426,24 @@ void CW_TlsLib_Shutdown(void)
 {
     wolfSSL_Cleanup();
 } // End: CW_TlsLib_Shutdown()
+
+void *XMALLOC(size_t n, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+    return CW_Common_Malloc(n);
+}
+
+void *XREALLOC(void *p, size_t n, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+    return CW_Common_Realloc(p,n);
+}
+
+void XFREE(void *p, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+    return CW_Common_Free(p);
+}

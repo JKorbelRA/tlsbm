@@ -12,7 +12,7 @@
 #define CW_COMMON_H
 
 #include <stdint.h>
-#include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 
@@ -47,10 +47,9 @@ void CW_Common_Allocaprint(uint8_t* pAlloca,
 //-----------------------------------------------------------------------------
 void CW_Common_Die(const char* pErrorMsg);
 
-void* CW_Common_Malloc(unsigned long size, void* heap, int type);
-void* CW_Common_Realloc(void* ptr, unsigned long size, void* heap,
-                             int type);
-void  CW_Common_Free(void* ptr, void* heap, int type);
+void* CW_Common_Malloc(unsigned long size);
+void* CW_Common_Realloc(void* ptr, unsigned long size);
+void  CW_Common_Free(void* ptr);
 void CW_Common_Shutdown(void);
 void CW_Common_Startup(void);
 
