@@ -109,6 +109,7 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
         int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
         if (res != 0)
         {
+            CW_Platform_CloseSocket(sd);
             continue;
         }
 

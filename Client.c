@@ -112,13 +112,13 @@ static int cw_Client_TcpConnect(int* pSocket, const char* pIp, uint16_t port)
 #define CW_CLIENT_FLAG_NO_ATONCE 0x04
 
 #define CW_CLIENT_TESTSTR(payload, flags)\
-    cw_Client_SendTestMsg(sd, pSocketSecureCtx, sizeof(payload) - 1, payload, flags)
+    cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, sizeof(payload) - 1, flags)
 #define CW_CLIENT_TESTMSG(payloadBytes, payload, flags)\
-    cw_Client_SendTestMsg(sd, pSocketSecureCtx, payloadBytes, payload, flags)
+    cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, payloadBytes, flags)
 
 
 static void cw_Client_SendTestMsg(int sd,
-                                  void* pSocketSecureCtx,
+                                  void* pSecureSocketCtx,
                                   uint8_t* pData,
                                   size_t dataBytes,
                                   uint8_t flags)
@@ -135,7 +135,7 @@ static void cw_Client_SendTestMsg(int sd,
     {
         printf("Basic test running.\n");
         CW_TlsLib_SendAll(sd,
-                          pSocketSecureCtx,
+                          pSecureSocketCtx,
                           cw_Client_msg.str.payload,
                           CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("Basic test DONE.\n");
@@ -149,7 +149,7 @@ static void cw_Client_SendTestMsg(int sd,
     {
         printf("1-by-1 test running.\n");
         CW_TlsLib_SendOneByOneByte(sd,
-                                   pSocketSecureCtx,
+                                   pSecureSocketCtx,
                                    cw_Client_msg.str.payload,
                                    CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("1-by-1 test DONE.\n");
@@ -163,7 +163,7 @@ static void cw_Client_SendTestMsg(int sd,
     {
         printf("All-at-once test running.\n");
         CW_TlsLib_SendAllInOne(sd,
-                               pSocketSecureCtx,
+                               pSecureSocketCtx,
                                cw_Client_msg.str.payload,
                                CW_Platform_Ntohs(cw_Client_msg.str.payloadBytesBe));
         printf("All-at-once test DONE.\n");
@@ -206,7 +206,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
-    CW_TlsLib_Handshake(pSecureSocketCtx);
+    CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
 
     // Let's test!

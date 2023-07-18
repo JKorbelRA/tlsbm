@@ -90,4 +90,5 @@ target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
 
 
 # CONFIG FILE GENERATION
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/crazywolf/Environment.h.in ${CMAKE_BINARY_DIR}/include/crazywolf/Environment.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/crazywolf/Environment.h.in
+               ${CMAKE_BINARY_DIR}/include/crazywolf/Environment.h)

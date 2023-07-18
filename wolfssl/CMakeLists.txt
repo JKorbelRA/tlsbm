@@ -11,7 +11,7 @@ set(C_STANDARD 99)
 
 
 
-set(WOLFSSL_SOURCE "C:\share\gitlab\wolfssl-5.6.3-stable" CACHE PATH "Path to wolfSSL sources")
+set(WOLFSSL_SOURCE "C:/share/gitlab/wolfssl-5.6.3-stable" CACHE PATH "Path to wolfSSL sources")
 option(WOLFSSL_USER_IO "" OFF)
 option(WOLFSSL_DEBUG "" ON)
 
@@ -23,5 +23,5 @@ set(TLSLIB_SRC
 
 add_subdirectory("${WOLFSSL_SOURCE}" wolfssl)
 
-add_library(${PROJECT_NAME} ${TLSLIB_SRC})
+add_library(${PROJECT_NAME} STATIC ${TLSLIB_SRC})
 target_link_libraries(${PROJECT_NAME} wolfssl)

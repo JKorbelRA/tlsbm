@@ -11,6 +11,10 @@
 #if !defined(CW_COMMON_H)
 #define CW_COMMON_H
 
+#include <stdint.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 
 #define SIMPLE_SSL_PORT 2221
 #define SIMPLE_SSL_SERVER_ADDR "127.0.0.1"

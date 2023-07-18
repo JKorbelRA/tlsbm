@@ -166,9 +166,6 @@ void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
 //-----------------------------------------------------------------------------
 int CW_Platform_Accept(int listenSd)
 {
-
-    // wait for clients
-    int clientSocket = 0;
     struct sockaddr_in  clientAddr;
     int clientLen = sizeof(clientAddr);
 
@@ -187,7 +184,7 @@ int CW_Platform_Accept(int listenSd)
 //-----------------------------------------------------------------------------
 void CW_Platform_CloseSocket(int sd)
 {
-    (void)SocketClose(sd);
+    (void)close(sd);
 }
 
 

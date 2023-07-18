@@ -120,11 +120,11 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
     if (pDevCertPath != NULL)
     {
-        int type = devCertFileType == TLSLIB_FILE_TYPE_DER ? WOLFSSL_FILETYPE_DER : WOLFSSL_FILETYPE_PEM;
+        int format = devCertFileType == TLSLIB_FILE_TYPE_DER ? WOLFSSL_FILETYPE_ASN1 : WOLFSSL_FILETYPE_PEM;
 
         if (wolfSSL_CTX_use_certificate_file(pCtx,
                                              pDevCertPath,
-                                             type) != WOLFSSL_SUCCESS)
+                                             format) != WOLFSSL_SUCCESS)
         {
             CW_Common_Die("Device cert load error: %s", pDevCertPath);
         }
@@ -136,9 +136,9 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
     if (pDevKeyPath != NULL)
     {
-        type = devKeyFileType == TLSLIB_FILE_TYPE_DER ? WOLFSSL_FILETYPE_DER : WOLFSSL_FILETYPE_PEM;
+        int format = devKeyFileType == TLSLIB_FILE_TYPE_DER ? WOLFSSL_FILETYPE_ASN1 : WOLFSSL_FILETYPE_PEM;
 
-        if (wolfSSL_CTX_use_PrivateKey_file(pCtx, pDevKeyPath, type) != WOLFSSL_SUCCESS)
+        if (wolfSSL_CTX_use_PrivateKey_file(pCtx, pDevKeyPath, format) != WOLFSSL_SUCCESS)
         {
             CW_Common_Die("Device key load error: %s", pDevKeyPath);
         }
@@ -186,9 +186,9 @@ void* CW_TlsLib_MakeSocketSecure(int sd, void* pSecureCtx)
 // its handle.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSocketSecureCtx)
+void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     wolfSSL_shutdown(pSsl);
     wolfSSL_free(pSsl);
 } // End: CW_TlsLib_UnmakeSocketSecure()
@@ -211,10 +211,10 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
 // Performs client handshake.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_ClientHandshake(int sd, void* pSocketSecureCtx)
+void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 {
     (void)sd;
-    WOLFSSL* pSsl = (WOLFSSL*)pCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     int ret = 0;
     int err = 0;
     do {
@@ -228,8 +228,10 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSocketSecureCtx)
 
     if (ret != WOLFSSL_SUCCESS)
     {
+#if defined(CW_ENV_DEBUG_ENABLE)
         printf("ssl connect error %d, %s\n", err,
             wolfSSL_ERR_error_string(err, cw_Client_errBuffer));
+#endif // defined(CW_ENV_DEBUG_ENABLE)
         CW_Common_Die("ssl connect failed");
     }
 } // End: CW_TlsLib_ClientHandshake()
@@ -240,9 +242,9 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSocketSecureCtx)
 // Performs server handshake.
 //
 //------------------------------------------------------------------------------
-int CW_TlsLib_ServerHandshake(int sd, void* pSocketSecureCtx)
+int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     int ret = 0;
     int err = 0;
     do
@@ -263,7 +265,6 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSocketSecureCtx)
                wolfSSL_ERR_error_string(err, cw_TlsLib_errBuffer));
 #endif // defined(CW_ENV_DEBUG_ENABLE)
         wolfSSL_free(pSsl);
-        CloseSocket(sd);
         ret = -1;
     }
 
@@ -278,11 +279,11 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSocketSecureCtx)
 //
 //------------------------------------------------------------------------------
 void CW_TlsLib_SendAll(int sd,
-                       void* pSocketSecureCtx,
+                       void* pSecureSocketCtx,
                        uint8_t* pData,
                        size_t dataBytes)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     int err = 0;
     uint32_t offset = 0;
     while (offset < dataBytes)
@@ -312,11 +313,11 @@ void CW_TlsLib_SendAll(int sd,
 //
 //------------------------------------------------------------------------------
 void CW_TlsLib_SendOneByOneByte(int sd,
-                                void* pSocketSecureCtx,
+                                void* pSecureSocketCtx,
                                 uint8_t* pData,
                                 size_t dataBytes)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
     int err = 0;
     uint32_t offset = 0;
     while (offset < dataBytes)
@@ -350,11 +351,11 @@ void CW_TlsLib_SendOneByOneByte(int sd,
 //
 //------------------------------------------------------------------------------
 void CW_TlsLib_SendAllInOne(int sd,
-                            void* pSocketSecureCtx,
+                            void* pSecureSocketCtx,
                             uint8_t* pData,
                             size_t dataBytes)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
 
     int ret = wolfSSL_write(pSsl, pData, dataBytes);
     if (ret != dataBytes)
@@ -376,11 +377,11 @@ void CW_TlsLib_SendAllInOne(int sd,
 //
 //------------------------------------------------------------------------------
 int CW_TlsLib_Recv(int sd,
-                   void* pSocketSecureCtx,
+                   void* pSecureSocketCtx,
                    uint8_t* pData,
                    size_t dataBytes)
 {
-    WOLFSSL* pSsl = (WOLFSSL*)pSocketSecureCtx;
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
 
     int offset = 0;
     int err = 0;
