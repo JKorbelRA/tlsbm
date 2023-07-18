@@ -83,8 +83,8 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          "devCert.pem",
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devKey.pem",
-                                                         TLSLIB_FILE_TYPE_PEM,
+                                                         "devKey.der",
+                                                         TLSLIB_FILE_TYPE_DER,
                                                          "ECDHE-ECDSA-AES128-SHA256");
 
 

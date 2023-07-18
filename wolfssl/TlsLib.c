@@ -232,7 +232,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
     {
 #if defined(CW_ENV_DEBUG_ENABLE)
         printf("ssl connect error %d, %s\n", err,
-            wolfSSL_ERR_error_string(err, cw_Client_errBuffer));
+            wolfSSL_ERR_error_string(err, cw_TlsLib_errBuffer));
 #endif // defined(CW_ENV_DEBUG_ENABLE)
         CW_Common_Die("ssl connect failed");
     }

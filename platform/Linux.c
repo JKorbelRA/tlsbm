@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -123,7 +124,7 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
 //-----------------------------------------------------------------------------
 void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
 {
-    char on = 1;
+    int on = 1;
     int len = sizeof(on);
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, len) < 0)
     {

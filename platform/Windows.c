@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include <ws2tcpip.h>
 
