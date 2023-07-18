@@ -283,6 +283,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 int main(int argc, char** argv)
 {
     CW_Platform_Startup();
+    CW_Common_Startup();
     CW_TlsLib_Startup();
 
     size_t stackMaxBytes = 50*1000;
@@ -309,6 +310,7 @@ int main(int argc, char** argv)
     CW_Platform_FlushStdout();
 
     CW_TlsLib_Shutdown();
+    CW_Common_Shutdown();
     CW_Platform_Shutdown();
 
     return result;

@@ -49,10 +49,20 @@
 // Variable definitions
 //-----------------------------------------------------------------------------
 
+FILE* cw_Common_heapCsv;
+
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
 
+void CW_Common_Startup(void)
+{
+    cw_Common_heapCsv = fopen("heap.csv", "w");
+    if (cw_Common_heapCsv == NULL)
+    {
+        CW_Common_Die("heap file creation failure");
+    }
+}
 
 
 uint8_t* CW_Common_Allocacheck(size_t stackMaxBytes)
@@ -88,3 +98,68 @@ void CW_Common_Die(const char* pErrorMsg)
     perror(pErrorMsg);
     exit(1);
 } // End: CW_Common_Die()
+
+void* CW_Common_Malloc(unsigned long size, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+
+    char buf[64];
+
+    void* pPtr = malloc(size);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", pPtr, NULL, (size_t)size);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage record line 4 malloc");
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+
+    return pPtr;
+}
+
+void* CW_Common_Realloc(void* ptr, unsigned long size, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+
+    char buf[64];
+
+    void* pPtr = realloc(ptr, size);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", pPtr, ptr, (size_t)size);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage record line 4 realloc");
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+
+    return pPtr;
+}
+
+void  CW_Common_Free(void* ptr, void* heap, int type)
+{
+    (void)heap;
+    (void)type;
+
+    char buf[64];
+
+    free(ptr);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", ptr, NULL, (size_t)0);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage record line 4 free");
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+}
+
+
+void CW_Common_Shutdown(void)
+{
+    fflush(cw_Common_heapCsv);
+    fclose(cw_Common_heapCsv);
+}
