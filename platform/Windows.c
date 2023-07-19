@@ -229,7 +229,7 @@ uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str)
 void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port)
 {
     struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
-    if (pPeerAddr != NULL)
+    if (pPeerAddr == NULL)
     {
         CW_Common_Die("peer address allocation failed\n");
     }
