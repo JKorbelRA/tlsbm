@@ -41,5 +41,7 @@ uint16_t CW_Platform_Htons(uint16_t hostNum);
 uint16_t CW_Platform_Ntohs(uint16_t networkNum);
 uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str);
 void CW_Platform_FlushStdout(void);
+void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port);
+void CW_Platform_DeletePeerAddr4(void* pPeerAddr);
 
 #endif // !defined(CW_PLATFORM_H)

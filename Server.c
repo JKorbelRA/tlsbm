@@ -113,7 +113,10 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
             continue;
         }
         CW_Common_AllocLogMarkerBegin("Secure Socket");
-        void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
+        void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
+                                                            pSecurityCtx,
+                                                            ip4Addr,
+                                                            port);
 
         int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
         if (res != 0)

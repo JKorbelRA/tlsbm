@@ -40,9 +40,9 @@
 #define CW_CLIENT_FLAG_NO_ATONCE 0x04
 
 #define CW_CLIENT_TESTSTR(payload, flags)\
-    cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, sizeof(payload) - 1, flags)
+        cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, sizeof(payload) - 1, flags)
 #define CW_CLIENT_TESTMSG(payloadBytes, payload, flags)\
-    cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, payloadBytes, flags)
+        cw_Client_SendTestMsg(sd, pSecureSocketCtx, payload, payloadBytes, flags)
 
 
 //-----------------------------------------------------------------------------
@@ -62,13 +62,13 @@
 //-----------------------------------------------------------------------------
 
 
-static void cw_Client_TlsClient(char* pServerIp4,
-                           uint16_t port,
-                           bool isPsk);
+static void cw_Client_TlsClient(uint32_t ip4Addr,
+                                uint16_t port,
+                                bool isPsk);
 
-static void cw_Client_DtlsClient(char* pServerIp4,
-                            uint16_t port,
-                            bool isPsk);
+static void cw_Client_DtlsClient(uint32_t ip4Addr,
+                                 uint16_t port,
+                                 bool isPsk);
 
 //-----------------------------------------------------------------------------
 // Variable definitions
@@ -135,11 +135,9 @@ static void cw_Client_SendToTestMsg(int sd,
 /// @return 0 on success
 ///
 //-----------------------------------------------------------------------------
-static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
+static void cw_Client_TlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
 {
     printf("Connecting server\n");
-
-    uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
     int sd = CW_Platform_Socket(true);
 
@@ -153,7 +151,7 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
         CW_Common_Die("sd connect failed");
     }
 
-    printf("Server %s:%d connected\n", pServerIp4, port);
+    printf("Server %d:%d connected\n", ip4Addr, port);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          CW_CACERT_PATH,
@@ -165,7 +163,10 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                                                          CW_CIPHER_SUITE,
                                                          true);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
-    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
+    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
+                                                        pSecurityCtx,
+                                                        ip4Addr,
+                                                        port);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -194,9 +195,8 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
 /// @return 0 on success
 ///
 //-----------------------------------------------------------------------------
-static void cw_Client_DtlsClient(char* pServerIp4, uint16_t port, bool isPsk)
+static void cw_Client_DtlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
 {
-    uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
     int sd = CW_Platform_Socket(false);
 
@@ -215,7 +215,10 @@ static void cw_Client_DtlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                                                          CW_CIPHER_SUITE,
                                                          false);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
-    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
+    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
+                                                        pSecurityCtx,
+                                                        ip4Addr,
+                                                        port);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -264,19 +267,22 @@ int main(int argc, char** argv)
         printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIp4);
     }
 
+
+    uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
+
 #if defined(CW_ENV_TEST_TLS)
 #if defined(CW_ENV_TEST_PSK)
-    cw_Client_TlsClient(pServerIp4, port, true);
+    cw_Client_TlsClient(ip4Addr, port, true);
 #else
-    cw_Client_TlsClient(pServerIp4, port, false);
+    cw_Client_TlsClient(ip4Addr, port, false);
 #endif // defined(CW_ENV_TEST_PSK)
 #endif defined(CW_ENV_TEST_TLS)
 
 #if defined(CW_ENV_TEST_DTLS)
 #if defined(CW_ENV_TEST_PSK)
-    cw_Client_DtlsClient(pServerIp4, port, true);
+    cw_Client_DtlsClient(ip4Addr, port, true);
 #else
-    cw_Client_DtlsClient(pServerIp4, port, false);
+    cw_Client_DtlsClient(ip4Addr, port, false);
 #endif // defined(CW_ENV_TEST_PSK)
 #endif defined(CW_ENV_TEST_TLS)
 

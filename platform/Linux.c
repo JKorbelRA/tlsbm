@@ -16,6 +16,7 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <string.h>
+#include <malloc.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -96,6 +97,27 @@ int CW_Platform_Socket(bool isStream)
     }
 }
 
+void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port)
+{
+    struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
+    if (pPeerAddr != NULL)
+    {
+        CW_Common_Die("peer address allocation failed\n");
+    }
+
+    memset(pPeerAddr, sizeof(struct sockaddr_in), 0);
+    pPeerAddr->sin_family = AF_INET;
+    pPeerAddr->sin_port = htons(port);
+    pPeerAddr->sin_addr.s_addr = ip4Addr;
+
+    return pPeerAddr;
+}
+
+void CW_Platform_DeletePeerAddr4(void* pPeerAddr)
+{
+    free(pPeerAddr);
+}
+
 
 //-----------------------------------------------------------------------------
 //
@@ -128,7 +150,7 @@ void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
     int len = sizeof(on);
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, len) < 0)
     {
-        CW_Common_Die("setsockopt SO_REUSEADDR failed");
+        CW_Common_Die("setsockopt SO_REUSEADDR failed\n");
     }
 
     struct sockaddr_in addr;
@@ -138,12 +160,12 @@ void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
 
     if (bind(sd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
-        CW_Common_Die("can't bind socket");
+        CW_Common_Die("can't bind socket\n");
     }
 
     if (listen(sd, SOMAXCONN) == -1)
     {
-        CW_Common_Die("can't listen to socket");
+        CW_Common_Die("can't listen to socket\n");
     }
 }
 

@@ -56,7 +56,10 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 /// @return opaque handle of the secure sd context.
 ///
 //------------------------------------------------------------------------------
-void* CW_TlsLib_MakeSocketSecure(int sd, void* pSecureCtx);
+void* CW_TlsLib_MakeSocketSecure(int sd,
+                                 void* pSecureCtx,
+                                 uint32_t ip4Addr,
+                                 uint16_t port);
 
 
 //------------------------------------------------------------------------------
