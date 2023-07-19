@@ -62,6 +62,10 @@ void CW_Common_Startup(void)
     {
         CW_Common_Die("unable to open heap.csv file for writing");
     }
+
+
+    fwrite("op,ptr,origptr,size\n", sizeof("op,ptr,origptr,size\n") - 1, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
 }
 
 
