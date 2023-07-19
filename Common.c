@@ -101,6 +101,7 @@ void CW_Common_Die(const char* pErrorMsg)
 
 void* CW_Common_Malloc(unsigned long size)
 {
+    return malloc(size);
     char buf[64];
 
     void* pPtr = malloc(size);
@@ -118,6 +119,7 @@ void* CW_Common_Malloc(unsigned long size)
 
 void* CW_Common_Realloc(void* ptr, unsigned long size)
 {
+    return realloc(ptr, size);
     char buf[64];
 
     void* pPtr = realloc(ptr, size);
@@ -135,6 +137,8 @@ void* CW_Common_Realloc(void* ptr, unsigned long size)
 
 void  CW_Common_Free(void* ptr)
 {
+    free(ptr);
+    return;
     char buf[64];
 
     free(ptr);

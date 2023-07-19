@@ -16,14 +16,14 @@ option(CW_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance.
 
 # SOURCES
 
-set(CLIENT_SRC 
+list(APPEND CLIENT_SRC 
     ${CMAKE_CURRENT_SOURCE_DIR}/Client.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Common.c
 )
-set(SERVER_SRC 
+list(APPEND SERVER_SRC 
     ${CMAKE_CURRENT_SOURCE_DIR}/Server.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Common.c
 )
+
+list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/Common.c)
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
     list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Linux.c)
