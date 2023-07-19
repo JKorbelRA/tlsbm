@@ -451,7 +451,7 @@ static unsigned int cw_TlsLib_ServerPskCb(WOLFSSL* pSsl,
         return 0;
     }
 
-    if (keyBytes <= ourPskBytes)
+    if (keyBytes >= ourPskBytes)
     {
         memcpy(pKey, pOurPsk, ourPskBytes);
     }
@@ -480,7 +480,7 @@ static unsigned int cw_TlsLib_ClientPskCb(WOLFSSL* pSsl,
     /* see internal.h MAX_PSK_ID_LEN for PSK identity limit */
     XSTRNCPY(pIdentity, pOurPskIdentity, identityBytes);
 
-    if (keyBytes <= ourPskBytes)
+    if (keyBytes >= ourPskBytes)
     {
         memcpy(pKey, pOurPsk, ourPskBytes);
     }
