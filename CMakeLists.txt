@@ -11,6 +11,7 @@ set(C_STANDARD 99)
 
 # OPTIONS
 
+option(BUILD_SHARED_LIBS "" OFF)
 option(CW_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance." OFF)
 option(CW_ENV_TEST_TLS "" OFF)
 option(CW_ENV_TEST_DTLS "" OFF)
@@ -36,6 +37,8 @@ elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Windows.c)
 endif()
 
+add_library(crazywolf-common ${COMMON_SRC})
+
 # INCLUDES
 
 include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -44,13 +47,13 @@ include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/incl
 
 add_subdirectory(wolfssl)
 
-add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC} ${COMMON_SRC})
+add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-client tlslib-wolfssl)
+target_link_libraries(${PROJECT_NAME}-wolfssl-client crazywolf-common tlslib-wolfssl crazywolf-common)
 
-add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC} ${COMMON_SRC})
+add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-server tlslib-wolfssl)
+target_link_libraries(${PROJECT_NAME}-wolfssl-server crazywolf-common tlslib-wolfssl crazywolf-common)
 
 ## # ------------------------------------------------------------------------------
 ## 
