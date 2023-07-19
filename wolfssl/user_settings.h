@@ -2,7 +2,7 @@
 #define WOLF_USER_SETTINGS_H
 
 
-// #define XMALLOC_USER
+#define XMALLOC_USER
 
 
 #endif // WOLF_USER_SETTINGS_H

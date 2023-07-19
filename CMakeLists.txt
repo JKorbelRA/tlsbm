@@ -26,6 +26,7 @@ list(APPEND SERVER_SRC
 list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/Common.c)
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+    add_definitions(-Wno-error=cpp)
     list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Linux.c)
 elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Windows.c)
