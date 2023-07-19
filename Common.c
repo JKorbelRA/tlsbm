@@ -60,7 +60,7 @@ void CW_Common_Startup(void)
     cw_Common_heapCsv = fopen("heap.csv", "w");
     if (cw_Common_heapCsv == NULL)
     {
-        CW_Common_Die("heap file creation failure");
+        CW_Common_Die("unable to open heap.csv file for writing");
     }
 }
 
@@ -101,11 +101,10 @@ void CW_Common_Die(const char* pErrorMsg)
 
 void* CW_Common_Malloc(unsigned long size)
 {
-    return malloc(size);
     char buf[64];
 
     void* pPtr = malloc(size);
-    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", pPtr, NULL, (size_t)size);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,%p,%p,%zu\n", pPtr, NULL, (size_t)size);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write heap usage record line 4 malloc");
@@ -119,11 +118,10 @@ void* CW_Common_Malloc(unsigned long size)
 
 void* CW_Common_Realloc(void* ptr, unsigned long size)
 {
-    return realloc(ptr, size);
     char buf[64];
 
     void* pPtr = realloc(ptr, size);
-    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", pPtr, ptr, (size_t)size);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "R,0x%p,0x%p,%zu\n", pPtr, ptr, (size_t)size);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write heap usage record line 4 realloc");
@@ -137,17 +135,15 @@ void* CW_Common_Realloc(void* ptr, unsigned long size)
 
 void  CW_Common_Free(void* ptr)
 {
-    free(ptr);
-    return;
     char buf[64];
 
-    free(ptr);
-    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "%p;%p;%zu\n", ptr, NULL, (size_t)0);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "F,0x%p,0x%p,%zu\n", ptr, NULL, (size_t)0);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write heap usage record line 4 free");
     }
 
+    free(ptr);
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
 }
