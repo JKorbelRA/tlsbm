@@ -163,10 +163,11 @@ static void cw_Client_TlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
                                                          CW_CIPHER_SUITE,
                                                          true);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
+
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
                                                         pSecurityCtx,
-                                                        ip4Addr,
-                                                        port);
+                                                        NULL,
+                                                        0);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -215,10 +216,13 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
                                                          CW_CIPHER_SUITE,
                                                          false);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
+
+    size_t peerAddrSize = 0;
+    void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, ip4Addr, port);
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
                                                         pSecurityCtx,
-                                                        ip4Addr,
-                                                        port);
+                                                        pPeerAddr,
+                                                        peerAddrSize);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -234,6 +238,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
     CW_Common_AllocLogMarkerEnd("Secure Socket");
+    CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 } // End: cw_Client_DtlsClient()

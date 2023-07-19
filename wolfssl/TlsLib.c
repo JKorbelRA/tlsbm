@@ -199,7 +199,10 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 // Makes a sd secure. Returns secure sd context handle.
 //
 //--------------------------------------------------------------------------
-void* CW_TlsLib_MakeSocketSecure(int sd, void* pSecureCtx, uint32_t ip4Addr, uint16_t port)
+void* CW_TlsLib_MakeSocketSecure(int sd,
+                                 void* pSecureCtx,
+                                 void* pPeerAddr,
+                                 size_t peerAddrSize)
 {
     WOLFSSL_CTX* pCtx = (WOLFSSL_CTX*)pSecureCtx;
     WOLFSSL* pSsl = wolfSSL_new(pCtx);
@@ -214,10 +217,9 @@ void* CW_TlsLib_MakeSocketSecure(int sd, void* pSecureCtx, uint32_t ip4Addr, uin
     }
 
     #if defined(CW_ENV_TEST_DTLS)
-        wolfSSL_dtls_set_peer(pSsl, ip4Addr, port);
-#else
-    (void)ip4Addr;
-    (void)port;
+        wolfSSL_dtls_set_peer(pSsl, pPeerAddr, peerAddrSize);
+    #else
+        (void)pPeerAddr;
     #endif
 
     return (void*)pSsl;

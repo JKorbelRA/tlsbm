@@ -58,8 +58,8 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 //------------------------------------------------------------------------------
 void* CW_TlsLib_MakeSocketSecure(int sd,
                                  void* pSecureCtx,
-                                 uint32_t ip4Addr,
-                                 uint16_t port);
+                                 void* pPeerAddr,
+                                 size_t peerAddrSize);
 
 
 //------------------------------------------------------------------------------
