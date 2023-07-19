@@ -199,7 +199,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 #if 0
                                                          "ECDHE-ECDSA-AES128-SHA256"
 #else
-                                                         "ECDHE-PSK-WITH-AES128-CBC-SHA256"
+                                                         "ECDHE-PSK-AES128-CBC-SHA256"
 #endif
                                                         );
 
