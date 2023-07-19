@@ -53,5 +53,7 @@ void  CW_Common_Free(void* ptr);
 void CW_Common_Shutdown(void);
 void CW_Common_Startup(void);const char* CW_Common_GetPskIdentity(void);
 uint8_t* CW_Common_GetPsk(size_t* pPskBytes);
+void  CW_Common_AllocLogMarkerBegin(void);
+void  CW_Common_AllocLogMarkerEnd(void);
 
 #endif // !defined(CW_COMMON_H)
