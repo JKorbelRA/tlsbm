@@ -13,6 +13,7 @@ set(WOLFSSL_SOURCE "C:/share/gitlab/wolfssl-5.6.3-stable" CACHE PATH "Path to wo
 option(WOLFSSL_USER_IO "" OFF)
 option(WOLFSSL_DEBUG "" ON)
 set(WOLFSSL_DTLS "yes" CACHE STRING "")
+set(BUILD_DTLS_COMMON "yes" CACHE STRING "")
 
 include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include ${WOLFSSL_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR})
 
