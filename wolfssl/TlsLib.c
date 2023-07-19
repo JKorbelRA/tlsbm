@@ -48,6 +48,11 @@
 // Local constants
 //-----------------------------------------------------------------------------
 
+static unsigned int cw_TlsLib_ServerPskCb(WOLFSSL* pSsl,
+                                          const char* pRecvdIdentity,
+                                          unsigned char* pKey,
+                                          unsigned int keyBytes);
+
 #if defined(CW_ENV_DEBUG_ENABLE)
 /// @brief Error buffer for error texts.
 static char cw_TlsLib_errBuffer[WOLFSSL_MAX_ERROR_SZ] = {0};
@@ -111,6 +116,15 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     if (pCtx == NULL)
     {
         CW_Common_Die("wolf ctx error");
+    }
+    if (isServer)
+    {
+        SSL_CTX_set_psk_server_callback(pCtx, &cw_TlsLib_ServerPskCb);
+        wolfSSL_CTX_use_psk_identity_hint(pCtx, "");
+    }
+    else
+    {
+        SSL_CTX_set_psk_client_callback(pCtx, &cw_TlsLib_ClientPskCb);
     }
 
     if (wolfSSL_CTX_load_verify_locations(pCtx, pCaCertPath, 0) != WOLFSSL_SUCCESS)
@@ -415,7 +429,63 @@ int CW_TlsLib_Recv(int sd,
     return -1;
 }
 
+static unsigned int cw_TlsLib_ServerPskCb(WOLFSSL* pSsl,
+                                          const char* pRecvdIdentity,
+                                          unsigned char* pKey,
+                                          unsigned int keyBytes)
+{
+    (void)pSsl;
 
+    const char* pOurPskIdentity = CW_Common_GetPskIdentity();
+    size_t ourPskBytes = 0;
+    uint8_t* pOurPsk = CW_Common_GetPsk(&ourPskBytes);
+
+    if (XSTRCMP(pRecvdIdentity, pOurPskIdentity) != 0)
+    {
+        return 0;
+    }
+
+    if (keyBytes <= ourPskBytes)
+    {
+        memcpy(pKey, pOurPsk, ourPskBytes);
+    }
+    else
+    {
+        return 0;
+    }
+
+    return ourPskBytes;
+}
+
+static unsigned int cw_TlsLib_ClientPskCb(WOLFSSL* pSsl,
+                                          const char* pHint,
+                                          char* pIdentity,
+                                          unsigned int identityBytes,
+                                          unsigned char* pKey,
+                                          unsigned int keyBytes)
+{
+    (void)pSsl;
+    (void)pHint;
+
+    const char* pOurPskIdentity = CW_Common_GetPskIdentity();
+    size_t ourPskBytes = 0;
+    uint8_t* pOurPsk = CW_Common_GetPsk(&ourPskBytes);
+
+    /* see internal.h MAX_PSK_ID_LEN for PSK identity limit */
+    XSTRNCPY(pIdentity, pOurPskIdentity, identityBytes);
+
+    if (keyBytes <= ourPskBytes)
+    {
+        memcpy(pKey, pOurPsk, ourPskBytes);
+    }
+    else
+    {
+        return 0;
+    }
+
+    return ourPskBytes;
+
+}
 
 //-----------------------------------------------------------------------------
 //

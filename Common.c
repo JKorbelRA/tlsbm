@@ -49,7 +49,16 @@
 // Variable definitions
 //-----------------------------------------------------------------------------
 
-FILE* cw_Common_heapCsv;
+static FILE* cw_Common_heapCsv;
+
+static uint8_t cw_Common_psk = {
+                                'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
+                                'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
+                                'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
+                                'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03
+};
+
+static const char* cw_Common_pPskIdentity = "WIZZARD";
 
 //-----------------------------------------------------------------------------
 // Function definitions
@@ -64,7 +73,8 @@ void CW_Common_Startup(void)
     }
 
 
-    fwrite("op,ptr,origptr,size\n", sizeof("op,ptr,origptr,size\n") - 1, 1, cw_Common_heapCsv);
+    fwrite("op,ptr,orig_ptr,size_bytes\n",
+           sizeof("op,ptr,orig_ptr,size_bytes\n") - 1, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
 }
 
@@ -114,6 +124,11 @@ void* CW_Common_Malloc(unsigned long size)
         CW_Common_Die("cannot write heap usage record line 4 malloc");
     }
 
+    if (size > 512)
+    {
+        printf("Allocating %zuB\n", size);
+    }
+
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
 
@@ -157,6 +172,17 @@ void  CW_Common_Free(void* ptr)
     fflush(cw_Common_heapCsv);
 }
 
+
+const char* CW_Common_GetPskIdentity(void)
+{
+    return cw_Common_pPskIdentity;
+}
+
+uint8_t* CW_Common_GetPsk(size_t* pPskBytes)
+{
+    *pPskBytes = sizeof(cw_Common_psk);
+    return cw_Common_psk;
+}
 
 void CW_Common_Shutdown(void)
 {
