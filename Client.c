@@ -246,7 +246,7 @@ static void cw_Client_DtlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                                                          TLSLIB_FILE_TYPE_DER,
                                                          isPsk ? "ECDHE-PSK-AES128-CBC-SHA256" : "ECDHE-ECDSA-AES128-SHA256",
                                                          false);
-    CW_Common_AllocLogMarkerBegin();
+    CW_Common_AllocLogMarkerBegin("Secure Socket");
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
@@ -262,7 +262,7 @@ static void cw_Client_DtlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                             sizeof("Hello world")-1);
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-    CW_Common_AllocLogMarkerEnd();
+    CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 } // End: cw_Client_DtlsClient()

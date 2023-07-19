@@ -13,11 +13,12 @@ class HeapStatistics:
             i = 0
             for a_row in reader:
                 if i > 0:
+                    b_or_e = a_row[0] in ["B", "E"]
                     alloc_point = {
                         "op": a_row[0],
                         "ptr": a_row[1],
-                        "orig_ptr": a_row[2],
-                        "size_bytes": a_row[3],
+                        "orig_ptr": a_row[2] if not b_or_e else "0",
+                        "size_bytes": a_row[3]  if not b_or_e else "0",
                     }
                     self.alloc_points.append(alloc_point)
                 i += 1
