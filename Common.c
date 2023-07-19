@@ -172,6 +172,18 @@ void  CW_Common_Free(void* ptr)
     fflush(cw_Common_heapCsv);
 }
 
+void  CW_Common_AllocLogMarkerBegin(void)
+{
+    fwrite("B,0x0,0x0,0\n", sizeof("B,0x0,0x0,0\n")-1, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+}
+
+void  CW_Common_AllocLogMarkerEnd(void)
+{
+    fwrite("E,0x0,0x0,0\n", sizeof("E,0x0,0x0,0\n")-1, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+}
+
 
 const char* CW_Common_GetPskIdentity(void)
 {

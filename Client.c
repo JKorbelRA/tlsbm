@@ -202,15 +202,15 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
                                                          "ECDHE-PSK-AES128-CBC-SHA256"
 #endif
                                                         );
-
+    CW_Common_AllocLogMarkerBegin();
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
 
     // Let's test!
-    printf("Test case 0: Mic test\n");
-    CW_CLIENT_TESTSTR("Hi", 0);
+    printf("Hello world test\n");
+    CW_CLIENT_TESTSTR("Hello world", CW_CLIENT_FLAG_NO_1BY1|CW_CLIENT_FLAG_NO_ATONCE);
     /*
     CW_CLIENT_TESTSTR("Hello", 0);
     CW_CLIENT_TESTSTR("Testing Testing", 0);
@@ -273,6 +273,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 */
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
+    CW_Common_AllocLogMarkerEnd();
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 

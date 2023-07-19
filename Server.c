@@ -117,7 +117,7 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
         {
             continue;
         }
-
+        CW_Common_AllocLogMarkerBegin();
         void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
         int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
@@ -160,6 +160,8 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
 
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
+
+        CW_Common_AllocLogMarkerEnd();
         CW_Platform_CloseSocket(sd);
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);

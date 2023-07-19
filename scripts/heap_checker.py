@@ -32,17 +32,23 @@ class HeapStatistics:
         self.alloc_points = []
         self.cur_alloc_blocks = {}
         self.file_to_points(heap_file)
+        self.seen_begin = False
+        self.seen_end = False
 
         self.y_axis_array = []
         self.x_axis_array = []
 
     def process_malloc(self, a_point):
+        if not self.seen_begin or self.seen_end:
+            return
         size_bytes = int(a_point["size_bytes"], 0)
         self.total_alloc += size_bytes
         self.used += size_bytes
         self.cur_alloc_blocks[f"{a_point['ptr']}"] = size_bytes
 
     def process_realloc(self, a_point):
+        if not self.seen_begin or self.seen_end:
+            return
         # Free first
         freed_size = self.cur_alloc_blocks[f"{a_point['orig_ptr']}"]
         del self.cur_alloc_blocks[f"{a_point['ptr']}"]
@@ -57,6 +63,8 @@ class HeapStatistics:
         self.cur_alloc_blocks[f"{a_point['ptr']}"] = size_bytes
 
     def process_free(self, a_point):
+        if not self.seen_begin or self.seen_end:
+            return
 
         freed_size = self.cur_alloc_blocks[f"{a_point['ptr']}"]
         del self.cur_alloc_blocks[f"{a_point['ptr']}"]
@@ -76,6 +84,10 @@ class HeapStatistics:
                 self.process_realloc(a_point)
             elif op == "F":
                 self.process_free(a_point)
+            elif op == "B":
+                self.seen_begin = True
+            elif op == "E":
+                self.seen_end = True
             else:
                 assert False, f"unknown op {op}"
 
