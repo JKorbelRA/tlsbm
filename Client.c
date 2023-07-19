@@ -61,9 +61,6 @@
 // Forward function declarations
 //-----------------------------------------------------------------------------
 
-static int cw_Client_TcpConnect(int* pSocket,
-                                const char* pIp,
-                                uint16_t port);
 
 static void cw_Client_TlsClient(char* pServerIp4,
                            uint16_t port,
@@ -83,35 +80,6 @@ static Msg_t cw_Client_msg;
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-///
-/// @brief init connection sd
-///
-/// @param[out] pSocket - pointer to sd
-/// @param[in] ip4Addr - server IP address
-/// @param[in] port - port
-///
-/// @return 0 on success
-///
-//-----------------------------------------------------------------------------
-static int cw_Client_TcpConnect(int* pSocket, uint32_t ip4Addr, uint16_t port)
-{
-    *pSocket = CW_Platform_Socket(true);
-
-    if (*pSocket == -1) // INVALID_SOCKET undef in Unix
-    {
-        CW_Common_Die("can't get sd");
-    }
-
-    if (CW_Platform_Connect(*pSocket, ip4Addr, port) == -1)
-    {
-        CW_Common_Die("sd connect failed");
-    }
-
-    return 0;
-} // End: cw_Client_TcpConnect()
 
 
 static void cw_Client_SendTestMsg(int sd,
@@ -196,7 +164,7 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                                                          TLSLIB_FILE_TYPE_DER,
                                                          isPsk ? "ECDHE-PSK-AES128-CBC-SHA256" : "ECDHE-ECDSA-AES128-SHA256",
                                                          true);
-    CW_Common_AllocLogMarkerBegin();
+    CW_Common_AllocLogMarkerBegin("Secure Socket");
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
@@ -210,7 +178,7 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
                           sizeof("Hello world")-1);
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-    CW_Common_AllocLogMarkerEnd();
+    CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 } // End: cw_Client_TlsClient()
