@@ -21,6 +21,26 @@
 #define SIMPLE_SSL_CERT_PATH "cert.pem"
 
 
+#if defined(CW_ENV_TEST_RSA)
+    #define CW_DEVCERT_PATH "devCertRsa.pem"
+    #define CW_CACERT_PATH "caCertRsa.pem"
+    #define CW_DEVKEY_PATH "devKeyRsa.der"
+    #if defined(CW_ENV_TEST_PSK)
+        #define CW_CIPHER_SUITE "DHE-PSK-AES128-CBC-SHA256"
+    #else
+        #define CW_CIPHER_SUITE "RSA-AES256-CBC-SHA256"
+    #endif
+#else
+    #define CW_DEVCERT_PATH "devCertEc.pem"
+    #define CW_CACERT_PATH "caCertEc.pem"
+    #define CW_DEVKEY_PATH "devKeyEc.der"
+    #if defined(CW_ENV_TEST_PSK)
+        #define CW_CIPHER_SUITE "ECDHE-PSK-AES128-CBC-SHA256"
+    #else
+        #define CW_CIPHER_SUITE "ECDHE-ECDSA-AES128-SHA256"
+    #endif
+#endif
+
 typedef union
 {
     struct

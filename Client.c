@@ -156,13 +156,13 @@ static void cw_Client_TlsClient(char* pServerIp4, uint16_t port, bool isPsk)
     printf("Server %s:%d connected\n", pServerIp4, port);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         "caCert.pem",
+                                                         CW_CACERT_PATH,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devCert.pem",
+                                                         CW_DEVCERT_PATH,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devKey.der",
+                                                         CW_DEVKEY_PATH,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         isPsk ? "ECDHE-PSK-AES128-CBC-SHA256" : "ECDHE-ECDSA-AES128-SHA256",
+                                                         CW_CIPHER_SUITE,
                                                          true);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
@@ -206,13 +206,13 @@ static void cw_Client_DtlsClient(char* pServerIp4, uint16_t port, bool isPsk)
     }
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         "caCert.pem",
+                                                         CW_CACERT_PATH,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devCert.pem",
+                                                         CW_DEVCERT_PATH,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         "devKey.der",
+                                                         CW_DEVKEY_PATH,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         isPsk ? "ECDHE-PSK-AES128-CBC-SHA256" : "ECDHE-ECDSA-AES128-SHA256",
+                                                         CW_CIPHER_SUITE,
                                                          false);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
@@ -264,10 +264,21 @@ int main(int argc, char** argv)
         printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIp4);
     }
 
-    cw_Client_TlsClient(pServerIp4, port, false);
+#if defined(CW_ENV_TEST_TLS)
+#if defined(CW_ENV_TEST_PSK)
     cw_Client_TlsClient(pServerIp4, port, true);
-    cw_Client_DtlsClient(pServerIp4, port, false);
+#else
+    cw_Client_TlsClient(pServerIp4, port, false);
+#endif // defined(CW_ENV_TEST_PSK)
+#endif defined(CW_ENV_TEST_TLS)
+
+#if defined(CW_ENV_TEST_DTLS)
+#if defined(CW_ENV_TEST_PSK)
     cw_Client_DtlsClient(pServerIp4, port, true);
+#else
+    cw_Client_DtlsClient(pServerIp4, port, false);
+#endif // defined(CW_ENV_TEST_PSK)
+#endif defined(CW_ENV_TEST_TLS)
 
     CW_Common_Allocaprint(pAlloca, stackMaxBytes);
     CW_Platform_FlushStdout();
