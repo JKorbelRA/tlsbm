@@ -13,5 +13,9 @@
 
 
 #cmakedefine CW_ENV_DEBUG_ENABLE
+#cmakedefine CW_ENV_TEST_TLS
+#cmakedefine CW_ENV_TEST_DTLS
+#cmakedefine CW_ENV_TEST_ECC
+#cmakedefine CW_ENV_TEST_RSA
 
 #endif // !defined(CW_ENVIRONMENT_H)

@@ -4,6 +4,7 @@
 
 #define XMALLOC_USER
 #undef NO_PSK
+#define WOLFSSL_DTLS
 
 
 #endif // WOLF_USER_SETTINGS_H

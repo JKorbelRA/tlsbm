@@ -40,7 +40,8 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                       TlsLibFileType_t devCertFileType,
                                       const char* pDevKeyPath,
                                       TlsLibFileType_t devKeyFileType,
-                                      const char* pCipherList);
+                                      const char* pCipherList,
+                                      bool isTls);
 
 
 //------------------------------------------------------------------------------
@@ -136,6 +137,28 @@ void CW_TlsLib_SendAll(int sd,
                        void* pSecureSocketCtx,
                        uint8_t* pData,
                        size_t dataBytes);
+
+
+//------------------------------------------------------------------------------
+///
+/// @brief Sends data securely until everything has been sent in a loop.
+///
+/// @param[in] sd Socket to send data on.
+///
+/// @param[in] pSecureSocketCtx Pointer to secure sd context created by
+/// CW_TlsLib_MakeSocketSecure().
+///
+/// @param[in] pData Pointer to buffer to send.
+///
+/// @param[in] dataBytes Size of the buffer to send in bytes.
+///
+//------------------------------------------------------------------------------
+void CW_TlsLib_SendToAll(int sd,
+                         void* pSecureSocketCtx,
+                         uint32_t ip4Addr,
+                         uint16_t port,
+                         uint8_t* pData,
+                         size_t dataBytes);
 
 
 //------------------------------------------------------------------------------

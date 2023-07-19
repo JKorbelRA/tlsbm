@@ -12,6 +12,10 @@ set(C_STANDARD 99)
 # OPTIONS
 
 option(CW_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance." OFF)
+option(CW_ENV_TEST_TLS "" OFF)
+option(CW_ENV_TEST_DTLS "" OFF)
+option(CW_ENV_TEST_ECC "" OFF)
+option(CW_ENV_TEST_RSA "" OFF)
 
 
 # SOURCES
