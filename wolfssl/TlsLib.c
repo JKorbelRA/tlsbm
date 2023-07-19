@@ -101,16 +101,31 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                       TlsLibFileType_t devCertFileType,
                                       const char* pDevKeyPath,
                                       TlsLibFileType_t devKeyFileType,
-                                      const char* pCipherList)
+                                      const char* pCipherList,
+                                      bool isTls)
 {
     WOLFSSL_METHOD* pMethod = NULL;
     if (isServer)
     {
-        pMethod = wolfTLSv1_2_server_method();
+        if (isTls)
+        {
+            pMethod = wolfTLSv1_2_server_method();
+        }
+        else
+        {
+            pMethod = wolfDTLSv1_2_server_method();
+        }
     }
     else
     {
-        pMethod = wolfTLSv1_2_client_method();
+        if (isTls)
+        {
+            pMethod = wolfTLSv1_2_client_method();
+        }
+        else
+        {
+            pMethod = wolfDTLSv1_2_client_method();
+        }
     }
 
     if (pMethod == NULL)
@@ -325,6 +340,39 @@ void CW_TlsLib_SendAll(int sd,
         } while (err == WC_PENDING_E);
     }
 } // End: CW_TlsLib_SendAll()
+
+
+void CW_TlsLib_SendToAll(int sd,
+                         void* pSecureSocketCtx,
+                         uint32_t ip4Addr,
+                         uint16_t port,
+                         uint8_t* pData,
+                         size_t dataBytes)
+{
+    (void)ip4Addr;
+    (void)port;
+
+    WOLFSSL* pSsl = (WOLFSSL*)pSecureSocketCtx;
+    int err = 0;
+    int offset = 0;
+    while (offset < dataBytes)
+    {
+        do
+        {
+            int ret = wolfSSL_write(pSsl,
+                                    pData + offset,
+                                    (int)dataBytes - offset);
+            if (ret <= 0)
+            {
+                err = wolfSSL_get_error(pSsl, 0);
+            }
+            else
+            {
+                offset += ret;
+            }
+        } while (err == WC_PENDING_E);
+    }
+}
 
 
 //------------------------------------------------------------------------------
