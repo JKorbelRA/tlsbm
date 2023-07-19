@@ -51,8 +51,7 @@
 //------------------------------------------------------------------------------
 
 static int cw_Server_TlsServer(uint32_t ip4Addr,
-                               uint16_t port,
-                               char* pCertDirPath);
+                               uint16_t port);
 
 
 //------------------------------------------------------------------------------
@@ -77,8 +76,7 @@ Msg_t cw_Server_inMsg;
 ///
 //------------------------------------------------------------------------------
 static int cw_Server_TlsServer(uint32_t ip4Addr,
-                               uint16_t port,
-                               char* pCertDirPath)
+                               uint16_t port)
 {
 
     size_t stackMaxBytes = 50*1000;
@@ -187,7 +185,6 @@ int main(int argc, char** argv)
     CW_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;
-    char* pCertPath = SIMPLE_SSL_CERT_PATH;
 
     // check args count
     if (argc > 1)
@@ -197,7 +194,7 @@ int main(int argc, char** argv)
 
     uint32_t ip4Addr = 0;
 
-    int result = cw_Server_TlsServer(ip4Addr, port, pCertPath);
+    int result = cw_Server_TlsServer(ip4Addr, port);
 
 
     CW_TlsLib_Shutdown();
