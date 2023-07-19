@@ -52,6 +52,12 @@ static unsigned int cw_TlsLib_ServerPskCb(WOLFSSL* pSsl,
                                           const char* pRecvdIdentity,
                                           unsigned char* pKey,
                                           unsigned int keyBytes);
+static unsigned int cw_TlsLib_ClientPskCb(WOLFSSL* pSsl,
+                                          const char* pHint,
+                                          char* pIdentity,
+                                          unsigned int identityBytes,
+                                          unsigned char* pKey,
+                                          unsigned int keyBytes);
 
 #if defined(CW_ENV_DEBUG_ENABLE)
 /// @brief Error buffer for error texts.
@@ -119,12 +125,12 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     }
     if (isServer)
     {
-        SSL_CTX_set_psk_server_callback(pCtx, &cw_TlsLib_ServerPskCb);
+        wolfSSL_CTX_set_psk_server_callback(pCtx, &cw_TlsLib_ServerPskCb);
         wolfSSL_CTX_use_psk_identity_hint(pCtx, "");
     }
     else
     {
-        SSL_CTX_set_psk_client_callback(pCtx, &cw_TlsLib_ClientPskCb);
+        wolfSSL_CTX_set_psk_client_callback(pCtx, &cw_TlsLib_ClientPskCb);
     }
 
     if (wolfSSL_CTX_load_verify_locations(pCtx, pCaCertPath, 0) != WOLFSSL_SUCCESS)
@@ -454,7 +460,7 @@ static unsigned int cw_TlsLib_ServerPskCb(WOLFSSL* pSsl,
         return 0;
     }
 
-    return ourPskBytes;
+    return (unsigned int)ourPskBytes;
 }
 
 static unsigned int cw_TlsLib_ClientPskCb(WOLFSSL* pSsl,
@@ -483,7 +489,7 @@ static unsigned int cw_TlsLib_ClientPskCb(WOLFSSL* pSsl,
         return 0;
     }
 
-    return ourPskBytes;
+    return (unsigned int)ourPskBytes;
 
 }
 

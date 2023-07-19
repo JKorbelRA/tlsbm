@@ -51,6 +51,7 @@ void* CW_Common_Malloc(unsigned long size);
 void* CW_Common_Realloc(void* ptr, unsigned long size);
 void  CW_Common_Free(void* ptr);
 void CW_Common_Shutdown(void);
-void CW_Common_Startup(void);
+void CW_Common_Startup(void);const char* CW_Common_GetPskIdentity(void);
+uint8_t* CW_Common_GetPsk(size_t* pPskBytes);
 
 #endif // !defined(CW_COMMON_H)

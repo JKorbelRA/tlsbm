@@ -51,7 +51,7 @@
 
 static FILE* cw_Common_heapCsv;
 
-static uint8_t cw_Common_psk = {
+static uint8_t cw_Common_psk[] = {
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,

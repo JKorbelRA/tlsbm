@@ -3,6 +3,7 @@
 
 
 #define XMALLOC_USER
+#undef NO_PSK
 
 
 #endif // WOLF_USER_SETTINGS_H
