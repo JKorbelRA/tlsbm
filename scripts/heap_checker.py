@@ -94,8 +94,9 @@ class HeapStatistics:
             if self.used > self.peak:
                 self.peak = self.used
 
-            self.x_axis_array.append(i)
-            self.y_axis_array.append(self.used)
+            if self.seen_begin and not self.seen_end:
+                self.x_axis_array.append(i)
+                self.y_axis_array.append(self.used)
             i += 1
 
     def draw(self):
