@@ -202,7 +202,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
                                                          "ECDHE-PSK-AES128-CBC-SHA256"
 #endif
                                                         );
-    CW_Common_AllocLogMarkerBegin();
+    CW_Common_AllocLogMarkerBegin("Secure Socket");
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
@@ -273,7 +273,7 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
 */
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-    CW_Common_AllocLogMarkerEnd();
+    CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 

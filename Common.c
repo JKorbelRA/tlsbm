@@ -172,15 +172,31 @@ void  CW_Common_Free(void* ptr)
     fflush(cw_Common_heapCsv);
 }
 
-void  CW_Common_AllocLogMarkerBegin(void)
+void  CW_Common_AllocLogMarkerBegin(const char* pMarker)
 {
-    fwrite("B,0x0,0x0,0\n", sizeof("B,0x0,0x0,0\n")-1, 1, cw_Common_heapCsv);
+    char buf[128];
+
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "B,%s,,\n", pMarker);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage begin marker");
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
 }
 
-void  CW_Common_AllocLogMarkerEnd(void)
+void  CW_Common_AllocLogMarkerEnd(const char* pMarker)
 {
-    fwrite("E,0x0,0x0,0\n", sizeof("E,0x0,0x0,0\n")-1, 1, cw_Common_heapCsv);
+    char buf[128];
+
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "E,%s,,\n", pMarker);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage end marker");
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
 }
 
