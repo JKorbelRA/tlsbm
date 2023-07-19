@@ -91,7 +91,12 @@ static int cw_Server_TlsServer(uint32_t ip4Addr,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          "devKey.der",
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         "ECDHE-ECDSA-AES128-SHA256");
+#if 0
+                                                         "ECDHE-ECDSA-AES128-SHA256"
+#else
+                                                         "ECDHE-PSK-WITH-AES128-CBC-SHA256"
+#endif
+                                                         );
 
 
     int listenSd = CW_Platform_Socket(true);

@@ -196,7 +196,12 @@ static int cw_Client_TlsClient(char* pSrvIP, uint16_t port, char* pCertDirPath)
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          "devKey.der",
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         "ECDHE-ECDSA-AES128-SHA256");
+#if 0
+                                                         "ECDHE-ECDSA-AES128-SHA256"
+#else
+                                                         "ECDHE-PSK-WITH-AES128-CBC-SHA256"
+#endif
+                                                        );
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
