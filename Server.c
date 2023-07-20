@@ -196,6 +196,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
                                  bool isPsk)
 {
 
+    CW_Common_AllocLogMarkerBegin("Context");
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
@@ -235,7 +236,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
             continue;
         }
 
-        CW_Common_AllocLogMarkerBegin("Secure Socket");
+        CW_Common_AllocLogMarkerEnd("Context");
         void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(sd,
                                                                 pSecurityCtx,
                                                                 pPeerAddr,
@@ -281,8 +282,6 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-
-        CW_Common_AllocLogMarkerEnd("Secure Socket");
         CW_Platform_CloseSocket(sd);
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);
@@ -310,38 +309,47 @@ int main(int argc, char** argv)
     CW_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;
-
-    // check args count
-    if (argc > 1)
-    {
-        // TODO enable change port or something else?
-    }
-
-    uint32_t ip4Addr = 0;
+    uint32_t ip4Addr = 0; // ANY
 
     printf("Starting TLS server, no PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("TLS, CERT, ECC");
     cw_Server_TlsServer(ip4Addr, port, false, false);
+    CW_Common_AllocLogMarkerEnd("TLS, CERT, ECC");
 
     printf("Starting TLS server, PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("TLS, PSK, ECC");
     cw_Server_TlsServer(ip4Addr, port, false, true);
+    CW_Common_AllocLogMarkerEnd("TLS, PSK, ECC");
 
     printf("Starting TLS server, no PSK, RSA\n");
+    CW_Common_AllocLogMarkerBegin("TLS, CERT, RSA");
     cw_Server_TlsServer(ip4Addr, port, true, false);
+    CW_Common_AllocLogMarkerEnd("TLS, CERT, RSA");
 
     printf("Starting TLS server, PSK, DHE\n");
+    CW_Common_AllocLogMarkerBegin("TLS, PSK, DHE");
     cw_Server_TlsServer(ip4Addr, port, true, true);
+    CW_Common_AllocLogMarkerEnd("TLS, PSK, DHE");
 
     printf("Starting DTLS server, no PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, CERT, ECC");
     cw_Server_DtlsServer(ip4Addr, port, false, false);
+    CW_Common_AllocLogMarkerEnd("DTLS, CERT, ECC");
 
     printf("Starting DTLS server, PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, PSK, ECC");
     cw_Server_DtlsServer(ip4Addr, port, false, true);
+    CW_Common_AllocLogMarkerEnd("DTLS, PSK, ECC");
 
     printf("Starting DTLS server, no PSK, RSA\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, CERT, RSA");
     cw_Server_DtlsServer(ip4Addr, port, true, false);
+    CW_Common_AllocLogMarkerEnd("DTLS, CERT, RSA");
 
     printf("Starting DTLS server, PSK, DHE\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, PSK, DHE");
     cw_Server_DtlsServer(ip4Addr, port, true, true);
+    CW_Common_AllocLogMarkerEnd("DTLS, PSK, DHE");
 
 
     CW_TlsLib_Shutdown();

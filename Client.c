@@ -214,6 +214,8 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  bool isRsa,
                                  bool isPsk)
 {
+    CW_Common_AllocLogMarkerBegin("Context");
+
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
@@ -236,7 +238,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                                          TLSLIB_FILE_TYPE_DER,
                                                          pCfg->pCipherSuite,
                                                          false);
-    CW_Common_AllocLogMarkerBegin("Secure Socket");
+    CW_Common_AllocLogMarkerEnd("Context");
 
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, ip4Addr, port);
@@ -301,42 +303,58 @@ int main(int argc, char** argv)
 
 
     printf("Starting TLS client, no PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("TLS, CERT, ECC");
     cw_Client_TlsClient(ip4Addr, port, false, false);
+    CW_Common_AllocLogMarkerEnd("TLS, CERT, ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client, PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("TLS, PSK, ECC");
     cw_Client_TlsClient(ip4Addr, port, false, true);
+    CW_Common_AllocLogMarkerEnd("TLS, PSK, ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client, no PSK, RSA\n");
+    CW_Common_AllocLogMarkerBegin("TLS, CERT, RSA");
     cw_Client_TlsClient(ip4Addr, port, true, false);
+    CW_Common_AllocLogMarkerEnd("TLS, CERT, RSA");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client, PSK, DHE\n");
+    CW_Common_AllocLogMarkerBegin("TLS, PSK, DHE");
     cw_Client_TlsClient(ip4Addr, port, true, true);
+    CW_Common_AllocLogMarkerEnd("TLS, PSK, DHE");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client, no PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, CERT, ECC");
     cw_Client_DtlsClient(ip4Addr, port, false, false);
+    CW_Common_AllocLogMarkerEnd("DTLS, CERT, ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client, PSK, ECC\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, PSK, ECC");
     cw_Client_DtlsClient(ip4Addr, port, false, true);
+    CW_Common_AllocLogMarkerEnd("DTLS, PSK, ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client, no PSK, RSA\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, CERT, RSA");
     cw_Client_DtlsClient(ip4Addr, port, true, false);
+    CW_Common_AllocLogMarkerEnd("DTLS, CERT, RSA");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client, PSK, DHE\n");
+    CW_Common_AllocLogMarkerBegin("DTLS, PSK, DHE");
     cw_Client_DtlsClient(ip4Addr, port, true, true);
+    CW_Common_AllocLogMarkerEnd("DTLS, PSK, DHE");
     printf("FINISHED\n");
 
 
