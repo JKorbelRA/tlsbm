@@ -238,12 +238,15 @@ int CW_Platform_Recvfrom(int sd,
                          void* pPeerAddr,
                          size_t* pPeerAddrSize)
 {
-    return recvfrom(sd,
+    unsigned int outSize = (unsigned int)*pPeerAddrSize;
+    int recvd = recvfrom(sd,
                     pData,
-                    dataBytes,
+                    (int)dataBytes,
                     0,
                     (struct sockaddr*)pPeerAddr,
-                    pPeerAddrSize);
+                    &outSize);
+    *pPeerAddrSize = outSize;
+    return recvd;
 
 }
 
@@ -258,12 +261,15 @@ int CW_Platform_RecvfromPeek(int sd,
                              void* pPeerAddr,
                              size_t* pPeerAddrSize)
 {
-    return recvfrom(sd,
+    unsigned int outSize = (unsigned int)*pPeerAddrSize;
+    int recvd = recvfrom(sd,
                     pData,
-                    dataBytes,
+                    (int)dataBytes,
                     MSG_PEEK,
                     (struct sockaddr*)pPeerAddr,
-                    pPeerAddrSize);
+                    &outSize);
+    *pPeerAddrSize = outSize;
+    return recvd;
 
 }
 
