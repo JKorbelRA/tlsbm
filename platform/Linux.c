@@ -120,6 +120,8 @@ void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint1
     pPeerAddr->sin_port = htons(port);
     pPeerAddr->sin_addr.s_addr = ip4Addr;
 
+    *pPeerAddrSize = sizeof(struct sockaddr_in);
+
     return pPeerAddr;
 }
 
