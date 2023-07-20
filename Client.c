@@ -143,6 +143,8 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 bool isPsk,
                                 bool isRsa)
 {
+    size_t stackMaxBytes = 50*1000;
+    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
     printf("Connecting server\n");
 
     int sd = CW_Platform_Socket(true);
@@ -189,6 +191,10 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
     CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
+
+
+    CW_Common_Allocaprint(pAlloca, stackMaxBytes);
+    CW_Platform_FlushStdout();
 } // End: cw_Client_TlsClient()
 
 
@@ -207,6 +213,8 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  bool isPsk,
                                  bool isRsa)
 {
+    size_t stackMaxBytes = 50*1000;
+    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
     int sd = CW_Platform_Socket(false);
 
@@ -252,6 +260,10 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
     CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
+
+
+    CW_Common_Allocaprint(pAlloca, stackMaxBytes);
+    CW_Platform_FlushStdout();
 } // End: cw_Client_DtlsClient()
 
 
@@ -266,8 +278,6 @@ int main(int argc, char** argv)
     CW_Common_Startup();
     CW_TlsLib_Startup();
 
-    size_t stackMaxBytes = 50*1000;
-    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
     uint16_t port = SIMPLE_SSL_PORT;
     char* pServerIp4;
@@ -287,32 +297,47 @@ int main(int argc, char** argv)
 
     uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
+
+    printf("Starting TLS client, no PSK, ECC\n");
     cw_Client_TlsClient(ip4Addr, port, false, false);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting TLS client, PSK, ECC\n");
     cw_Client_TlsClient(ip4Addr, port, false, true);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting TLS client, no PSK, RSA\n");
     cw_Client_TlsClient(ip4Addr, port, true, false);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting TLS client, PSK, DHE\n");
     cw_Client_TlsClient(ip4Addr, port, true, true);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting DTLS client, no PSK, ECC\n");
     cw_Client_DtlsClient(ip4Addr, port, false, false);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting DTLS client, PSK, ECC\n");
     cw_Client_DtlsClient(ip4Addr, port, false, true);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting DTLS client, no PSK, RSA\n");
     cw_Client_DtlsClient(ip4Addr, port, true, false);
+    printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
+    printf("Starting DTLS client, PSK, DHE\n");
     cw_Client_DtlsClient(ip4Addr, port, true, true);
-    CW_Platform_Sleep(5);
+    printf("FINISHED\n");
 
-    CW_Common_Allocaprint(pAlloca, stackMaxBytes);
-    CW_Platform_FlushStdout();
+
 
     CW_TlsLib_Shutdown();
     CW_Common_Shutdown();
