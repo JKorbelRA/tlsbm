@@ -138,7 +138,7 @@ void* CW_Common_Malloc(unsigned long size)
     char buf[64];
 
     void* pPtr = malloc(size);
-    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,0x%p,0x%p,%zu\n", pPtr, NULL, (size_t)size);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,0x%p,0x0,%zu\n", pPtr, (size_t)size);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write heap usage record line 4 malloc");
@@ -181,7 +181,7 @@ void  CW_Common_Free(void* ptr)
 
     char buf[64];
 
-    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "F,0x%p,0x%p,%zu\n", ptr, NULL, (size_t)0);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "F,0x%p,0x0,0\n", ptr);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write heap usage record line 4 free");
