@@ -37,6 +37,16 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port);
 void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port);
 void CW_Platform_Listen(int sd);
 int CW_Platform_Accept(int listenSd);
+int CW_Platform_Recvfrom(int sd,
+                         uint8_t* pData,
+                         size_t dataBytes,
+                         void* pPeerAddr,
+                         size_t* pPeerAddrSize);
+int CW_Platform_RecvfromPeek(int sd,
+                             uint8_t* pData,
+                             size_t dataBytes,
+                             void* pPeerAddr,
+                             size_t* pPeerAddrSize);
 void CW_Platform_CloseSocket(int sd);
 uint16_t CW_Platform_Htons(uint16_t hostNum);
 uint16_t CW_Platform_Ntohs(uint16_t networkNum);

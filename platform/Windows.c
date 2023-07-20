@@ -189,6 +189,43 @@ void CW_Platform_CloseSocket(int sd)
 }
 
 
+int CW_Platform_Recvfrom(int sd,
+                         uint8_t* pData,
+                         size_t dataBytes,
+                         void* pPeerAddr,
+                         size_t* pPeerAddrSize)
+{
+    int outSize = (int)*pPeerAddrSize;
+    int recvd = recvfrom(sd,
+                    pData,
+                    (int)dataBytes,
+                    0,
+                    (struct sockaddr*)pPeerAddr,
+                    &outSize);
+    *pPeerAddrSize = outSize;
+    return recvd;
+
+}
+
+int CW_Platform_RecvfromPeek(int sd,
+                             uint8_t* pData,
+                             size_t dataBytes,
+                             void* pPeerAddr,
+                             size_t* pPeerAddrSize)
+{
+    int outSize = (int)*pPeerAddrSize;
+    int recvd = recvfrom(sd,
+        pData,
+        (int)dataBytes,
+        MSG_PEEK,
+        (struct sockaddr*)pPeerAddr,
+        &outSize);
+    *pPeerAddrSize = outSize;
+    return recvd;
+
+}
+
+
 //-----------------------------------------------------------------------------
 //
 // Shut the platform down.
@@ -243,6 +280,36 @@ void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint1
     }
     *pPeerAddrSize = sizeof(struct sockaddr_in);
     return pPeerAddr;
+}
+
+
+void CW_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
+                                        uint32_t* pIp4Addr,
+                                        uint16_t* pPort)
+{
+    if (pPeerAddrIn == NULL)
+    {
+        CW_Common_Die("pPeerAddrIn bad arg failed\n");
+    }
+    if (pIp4Addr == NULL)
+    {
+        CW_Common_Die("pIp4Addr bad arg failed\n");
+    }
+    if (pPort == NULL)
+    {
+        CW_Common_Die("pPort bad arg failed\n");
+    }
+
+    struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)pPeerAddrIn;
+
+
+    if (pPeerAddr->sin_family != AF_INET)
+    {
+        CW_Common_Die("pPeerAddr->sin_family != AF_INET\n");
+    }
+
+    *pIp4Addr = pPeerAddr->sin_addr.s_addr;
+    *pPort = pPeerAddr->sin_port;
 }
 
 

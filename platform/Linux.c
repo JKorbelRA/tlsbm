@@ -159,6 +159,36 @@ void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 }
 
 
+void CW_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
+                                        uint32_t* pIp4Addr,
+                                        uint16_t* pPort)
+{
+    if (pPeerAddrIn == NULL)
+    {
+        CW_Common_Die("pPeerAddrIn bad arg failed\n");
+    }
+    if (pIp4Addr == NULL)
+    {
+        CW_Common_Die("pIp4Addr bad arg failed\n");
+    }
+    if (pPort == NULL)
+    {
+        CW_Common_Die("pPort bad arg failed\n");
+    }
+
+    struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)pPeerAddrIn;
+
+
+    if (pPeerAddr->sin_family != AF_INET)
+    {
+        CW_Common_Die("pPeerAddr->sin_family != AF_INET\n");
+    }
+
+    *pIp4Addr = pPeerAddr->sin_addr.s_addr;
+    *pPort = pPeerAddr->sin_port;
+}
+
+
 void CW_Platform_Listen(int sd)
 {
     if (listen(sd, SOMAXCONN) == -1)
@@ -199,6 +229,37 @@ int CW_Platform_Accept(int listenSd)
 void CW_Platform_CloseSocket(int sd)
 {
     (void)close(sd);
+}
+
+
+int CW_Platform_Recvfrom(int sd,
+                         uint8_t* pData,
+                         size_t dataBytes,
+                         void* pPeerAddr,
+                         size_t* pPeerAddrSize)
+{
+    return recvfrom(sd,
+                    pData,
+                    dataBytes,
+                    0,
+                    (struct sockaddr*)pPeerAddr,
+                    pPeerAddrSize);
+
+}
+
+int CW_Platform_RecvfromPeek(int sd,
+                             uint8_t* pData,
+                             size_t dataBytes,
+                             void* pPeerAddr,
+                             size_t* pPeerAddrSize)
+{
+    return recvfrom(sd,
+                    pData,
+                    dataBytes,
+                    MSG_PEEK,
+                    (struct sockaddr*)pPeerAddr,
+                    pPeerAddrSize);
+
 }
 
 
