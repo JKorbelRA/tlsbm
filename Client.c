@@ -162,7 +162,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          pCfg->pDevCert,
