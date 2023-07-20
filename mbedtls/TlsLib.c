@@ -100,6 +100,14 @@ static void cw_TlsLib_Debug(void* ctx, int level,
 mbedtls_entropy_context cw_TlsLib_entropy;
 mbedtls_ctr_drbg_context cw_TlsLib_ctrDrbg;
 
+int cw_TlsLib_csLists[4][2] =
+{
+ {MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, 0},
+ {MBEDTLS_TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256, 0},
+ {MBEDTLS_TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, 0},
+ {MBEDTLS_TLS_DHE_PSK_WITH_AES_128_CBC_SHA256, 0},
+};
+
 //-----------------------------------------------------------------------------
 // Global references
 //-----------------------------------------------------------------------------
@@ -200,13 +208,46 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
         CW_Common_Die("mbedtls_ssl_config_defaults error\n");
     }
 
+    int* csPick = NULL;
+
+    if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_CERT) == 0)
+    {
+        csPick = &cw_TlsLib_csLists[0][0];
+    }
+    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_PSK) == 0)
+    {
+        csPick = &cw_TlsLib_csLists[1][0];
+
+    }
+    else if (strcmp(pCipherList, CW_CIPHER_SUITE_RSA_CERT) == 0)
+    {
+        csPick = &cw_TlsLib_csLists[2][0];
+
+    }
+    else if (strcmp(pCipherList, CW_CIPHER_SUITE_RSA_PSK) == 0)
+    {
+        csPick = &cw_TlsLib_csLists[3][0];
+
+    }
+
+    mbedtls_ssl_conf_ciphersuites(&pCtx->sslCfg, csPick);
+
 
     mbedtls_ssl_conf_rng(&pCtx->sslCfg, mbedtls_ctr_drbg_random, &cw_TlsLib_ctrDrbg);
     mbedtls_ssl_conf_dbg(&pCtx->sslCfg, cw_TlsLib_Debug, stdout);
+
+
+    const char* pPskIdentity = CW_Common_GetPskIdentity();
+    size_t pskIdentitySize = strlen(pPskIdentity);
+    size_t pskBytes = 0;
+    uint8_t* pPsk = CW_Common_GetPsk(&pskBytes);
+
+    mbedtls_ssl_conf_psk(&pCtx->sslCfg, pPsk, pskBytes, (const uint8_t*)pPskIdentity, pskIdentitySize);
     mbedtls_ssl_conf_read_timeout(&pCtx->sslCfg, READ_TIMEOUT_MS);
 
 
-    mbedtls_ssl_conf_ca_chain(&pCtx->sslCfg, pCtx->devCert.next, NULL);
+
+    mbedtls_ssl_conf_ca_chain(&pCtx->sslCfg, &pCtx->caCert, NULL);
     if (mbedtls_ssl_conf_own_cert(&pCtx->sslCfg, &pCtx->devCert, &pCtx->devKey) != 0)
     {
         CW_Common_Die("mbedtls_ssl_conf_own_cert error\n");
@@ -253,6 +294,8 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 
     MbedTlsObject_t* pSecureSocketContext = malloc(sizeof(MbedTlsObject_t));
 
+    mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
+
     if (mbedtls_ssl_setup(&pSecureSocketContext->sslCtx, &pCtx->sslCfg) != 0)
     {
         CW_Common_Die("mbedtls_ssl_setup error\n");
@@ -291,6 +334,8 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
     MbedDtlsContext_t* pCtx = (MbedDtlsContext_t*)pSecureCtx;
 
     MbedDtlsObject_t* pSecureSocketContext = malloc(sizeof(MbedDtlsObject_t));
+
+    mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
     if (mbedtls_ssl_setup(&pSecureSocketContext->sslCtx, &pCtx->sslCfg) != 0)
     {
@@ -331,8 +376,17 @@ void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
 {
     MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
 
+    int ret = 0;
+    /* No error checking, the connection might be closed already */
+    do {
+        ret = mbedtls_ssl_close_notify(&pSsl->sslCtx);
+    } while (ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+
     mbedtls_net_free(&pSsl->netCtx);
     mbedtls_ssl_free(&pSsl->sslCtx);
+
+    free(pSsl);
+
 } // End: CW_TlsLib_UnmakeSocketSecure()
 
 
@@ -345,10 +399,10 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
 {
     MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
+    mbedtls_ssl_config_free(&pCtx->sslCfg);
     mbedtls_x509_crt_free(&pCtx->caCert);
     mbedtls_x509_crt_free(&pCtx->devCert);
     mbedtls_pk_free(&pCtx->devKey);
-    mbedtls_ssl_config_free(&pCtx->sslCfg);
 
     free(pCtx);
 } // End: CW_TlsLib_DestroySecureContext()
@@ -370,6 +424,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
     } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
             ret == MBEDTLS_ERR_SSL_WANT_WRITE);
 
+#if 0
     uint32_t flags;
     /* In real life, we would have used MBEDTLS_SSL_VERIFY_REQUIRED so that the
      * handshake would not succeed if the peer's cert is bad.  Even if we used
@@ -392,6 +447,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
     {
         printf(" ok\n");
     }
+#endif // 0
 } // End: CW_TlsLib_ClientHandshake()
 
 
