@@ -13,8 +13,8 @@
 #define RSA_LOW_MEM
 #define CURVE25519_SMALL
 #define WOLFSSL_SMALL_CERT_VERIFY
-#define HAVE_CHACHA
-#define HAVE_POLY1305
+// #define HAVE_CHACHA
+// #define HAVE_POLY1305
 #define NO_OLD_POLY1305
 
 
