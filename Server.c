@@ -316,7 +316,7 @@ int main(int argc, char** argv)
     }
 
     uint32_t ip4Addr = 0;
-
+/*
     printf("Starting TLS server, no PSK, ECC\n");
     cw_Server_TlsServer(ip4Addr, port, false, false);
 
@@ -328,10 +328,10 @@ int main(int argc, char** argv)
 
     printf("Starting TLS server, PSK, DHE\n");
     cw_Server_TlsServer(ip4Addr, port, true, true);
-
+*/
     printf("Starting DTLS server, no PSK, ECC\n");
     cw_Server_DtlsServer(ip4Addr, port, false, false);
-
+/*
     printf("Starting DTLS server, PSK, ECC\n");
     cw_Server_DtlsServer(ip4Addr, port, false, true);
 
@@ -340,7 +340,7 @@ int main(int argc, char** argv)
 
     printf("Starting DTLS server, PSK, DHE\n");
     cw_Server_DtlsServer(ip4Addr, port, true, true);
-
+*/
 
     CW_TlsLib_Shutdown();
     CW_Common_Shutdown();

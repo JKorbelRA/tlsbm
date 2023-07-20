@@ -300,7 +300,7 @@ int main(int argc, char** argv)
     uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
 
-    printf("Starting TLS client, no PSK, ECC\n");
+   /* printf("Starting TLS client, no PSK, ECC\n");
     cw_Client_TlsClient(ip4Addr, port, false, false);
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
@@ -318,7 +318,7 @@ int main(int argc, char** argv)
     printf("Starting TLS client, PSK, DHE\n");
     cw_Client_TlsClient(ip4Addr, port, true, true);
     printf("Sleep 5s before next test...\n");
-    CW_Platform_Sleep(5);
+    CW_Platform_Sleep(5);*/
 
     printf("Starting DTLS client, no PSK, ECC\n");
     cw_Client_DtlsClient(ip4Addr, port, false, false);
