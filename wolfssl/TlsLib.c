@@ -200,27 +200,50 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 //
 //--------------------------------------------------------------------------
 void* CW_TlsLib_MakeSocketSecure(int sd,
-                                 void* pSecureCtx,
-                                 void* pPeerAddr,
-                                 size_t peerAddrSize)
+                                 void* pSecureCtx)
 {
     WOLFSSL_CTX* pCtx = (WOLFSSL_CTX*)pSecureCtx;
     WOLFSSL* pSsl = wolfSSL_new(pCtx);
     if (pSsl == NULL)
     {
-        CW_Common_Die("wolf ssl error");
+        CW_Common_Die("wolfSSL_new error");
     }
 
     if (wolfSSL_set_fd(pSsl, sd) != WOLFSSL_SUCCESS)
     {
-        CW_Common_Die("wolf set_fd error");
+        CW_Common_Die("wolfSSL_set_fd error");
     }
 
-    #if defined(CW_ENV_TEST_DTLS)
-        wolfSSL_dtls_set_peer(pSsl, pPeerAddr, peerAddrSize);
-    #else
-        (void)pPeerAddr;
-    #endif
+    return (void*)pSsl;
+} // End: CW_TlsLib_MakeSocketSecure()
+
+
+//------------------------------------------------------------------------------
+//
+// Makes a sd secure. Returns secure sd context handle.
+//
+//--------------------------------------------------------------------------
+void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
+                                     void* pSecureCtx,
+                                     void* pPeerAddr,
+                                     size_t peerAddrSize)
+{
+    WOLFSSL_CTX* pCtx = (WOLFSSL_CTX*)pSecureCtx;
+    WOLFSSL* pSsl = wolfSSL_new(pCtx);
+    if (pSsl == NULL)
+    {
+        CW_Common_Die("wolfSSL_new error");
+    }
+
+    if (wolfSSL_set_fd(pSsl, sd) != WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("wolfSSL_set_fd error");
+    }
+
+    if (wolfSSL_dtls_set_peer(pSsl, pPeerAddr, peerAddrSize)!= WOLFSSL_SUCCESS)
+    {
+        CW_Common_Die("wolf wolfSSL_dtls_set_peer error");
+    }
 
     return (void*)pSsl;
 } // End: CW_TlsLib_MakeSocketSecure()

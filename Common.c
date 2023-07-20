@@ -60,6 +60,26 @@ static uint8_t cw_Common_psk[] = {
 
 static const char* cw_Common_pPskIdentity = "WIZZARD";
 
+
+static SuiteCfg_t cw_Common_suiteCfgs[] = {
+                                           {CW_CIPHER_SUITE_ECC_CERT,
+                                            CW_CACERT_ECC_PATH,
+                                            CW_DEVCERT_ECC_PATH,
+                                            CW_DEVCERT_ECC_PATH},
+                                           {CW_CIPHER_SUITE_ECC_PSK,
+                                            CW_CACERT_ECC_PATH,
+                                            CW_DEVCERT_ECC_PATH,
+                                            CW_DEVCERT_ECC_PATH},
+                                           {CW_CIPHER_SUITE_RSA_CERT,
+                                            CW_CACERT_RSA_PATH,
+                                            CW_DEVCERT_RSA_PATH,
+                                            CW_DEVKEY_RSA_PATH},
+                                           {CW_CIPHER_SUITE_RSA_PSK,
+                                            CW_CACERT_RSA_PATH,
+                                            CW_DEVCERT_RSA_PATH,
+                                            CW_DEVKEY_RSA_PATH}
+};
+
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
@@ -216,4 +236,12 @@ void CW_Common_Shutdown(void)
 {
     fflush(cw_Common_heapCsv);
     fclose(cw_Common_heapCsv);
+}
+
+
+SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa)
+{
+    int id = ((isRsa == true) << 1) | (isPsk == true);
+
+    return &cw_Common_suiteCfgs[id];
 }

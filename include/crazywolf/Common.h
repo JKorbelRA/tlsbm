@@ -17,29 +17,27 @@
 
 
 #define SIMPLE_SSL_PORT 2221
-#define SIMPLE_SSL_SERVER_ADDR "127.0.0.1"
-#define SIMPLE_SSL_CERT_PATH "cert.pem"
 
+#define CW_DEVCERT_RSA_PATH "devCertRsa.pem"
+#define CW_CACERT_RSA_PATH "caCertRsa.pem"
+#define CW_DEVKEY_RSA_PATH "devKeyRsa.der"
 
-#if defined(CW_ENV_TEST_RSA)
-    #define CW_DEVCERT_PATH "devCertRsa.pem"
-    #define CW_CACERT_PATH "caCertRsa.pem"
-    #define CW_DEVKEY_PATH "devKeyRsa.der"
-    #if defined(CW_ENV_TEST_PSK)
-        #define CW_CIPHER_SUITE "DHE-PSK-AES128-CBC-SHA256"
-    #else
-        #define CW_CIPHER_SUITE "RSA-AES256-CBC-SHA256"
-    #endif
-#else
-    #define CW_DEVCERT_PATH "devCertEc.pem"
-    #define CW_CACERT_PATH "caCertEc.pem"
-    #define CW_DEVKEY_PATH "devKeyEc.der"
-    #if defined(CW_ENV_TEST_PSK)
-        #define CW_CIPHER_SUITE "ECDHE-PSK-AES128-CBC-SHA256"
-    #else
-        #define CW_CIPHER_SUITE "ECDHE-ECDSA-AES128-SHA256"
-    #endif
-#endif
+#define CW_DEVCERT_ECC_PATH "devCertEc.pem"
+#define CW_CACERT_ECC_PATH "caCertEc.pem"
+#define CW_DEVKEY_ECC_PATH "devKeyEc.der"
+
+#define CW_CIPHER_SUITE_RSA_PSK "DHE-PSK-AES128-CBC-SHA256"
+#define CW_CIPHER_SUITE_RSA_CERT "RSA-AES256-CBC-SHA256"
+#define CW_CIPHER_SUITE_ECC_PSK "ECDHE-PSK-AES128-CBC-SHA256"
+#define CW_CIPHER_SUITE_ECC_CERT "ECDHE-ECDSA-AES128-SHA256"
+
+typedef struct
+{
+    const char* pCipherSuite;
+    const char* pCaCert;
+    const char* pDevCert;
+    const char* pDevKey;
+} SuiteCfg_t;
 
 typedef union
 {
@@ -75,5 +73,6 @@ void CW_Common_Startup(void);const char* CW_Common_GetPskIdentity(void);
 uint8_t* CW_Common_GetPsk(size_t* pPskBytes);
 void  CW_Common_AllocLogMarkerBegin(const char* pMarker);
 void  CW_Common_AllocLogMarkerEnd(const char* pMarker);
+SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa);
 
 #endif // !defined(CW_COMMON_H)

@@ -52,9 +52,13 @@
 //------------------------------------------------------------------------------
 
 static void cw_Server_TlsServer(uint32_t ip4Addr,
-                               uint16_t port);
+                                uint16_t port,
+                                bool isPsk,
+                                bool isRsa);
 static void cw_Server_DtlsServer(uint32_t ip4Addr,
-                                 uint16_t port);
+                                 uint16_t port,
+                                 bool isPsk,
+                                 bool isRsa);
 
 //------------------------------------------------------------------------------
 // Variable definitions
@@ -78,21 +82,25 @@ Msg_t cw_Server_inMsg;
 ///
 //------------------------------------------------------------------------------
 static void cw_Server_TlsServer(uint32_t ip4Addr,
-                               uint16_t port)
+                                uint16_t port,
+                                bool isPsk,
+                                bool isRsa)
 {
 
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                         CW_CACERT_PATH,
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                         pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVCERT_PATH,
+                                                         pCfg->pDevCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVKEY_PATH,
+                                                         pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         CW_CIPHER_SUITE,
-                                                         true);
+                                                         pCfg->pCipherSuite,
+                                                         false);
 
     int listenSd = CW_Platform_Socket(true);
     if (listenSd == -1) //INVALID_SOCKET undef on Unix
@@ -100,8 +108,9 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
         CW_Common_Die("can't create socket");
     }
 
-    CW_Platform_BindAndListen(listenSd, ip4Addr, port);
-    printf("Simple SSL server started on port %d\n", port);
+    CW_Platform_Bind(listenSd, ip4Addr, port);
+    CW_Platform_Listen(listenSd);
+    printf("Simple TLS server started on port %d\n", port);
 
     while (true)
     {
@@ -114,9 +123,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
         }
         CW_Common_AllocLogMarkerBegin("Secure Socket");
         void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
-                                                            pSecurityCtx,
-                                                            ip4Addr,
-                                                            port);
+                                                            pSecurityCtx);
 
         int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
         if (res != 0)
@@ -181,21 +188,25 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 ///
 //------------------------------------------------------------------------------
 static void cw_Server_DtlsServer(uint32_t ip4Addr,
-                                 uint16_t port)
+                                 uint16_t port,
+                                 bool isPsk,
+                                 bool isRsa)
 {
 
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                         CW_CACERT_PATH,
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                         pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVCERT_PATH,
+                                                         pCfg->pDevCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVKEY_PATH,
+                                                         pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         CW_CIPHER_SUITE,
-                                                         true);
+                                                         pCfg->pCipherSuite,
+                                                         false);
 
     int listenSd = CW_Platform_Socket(false);
     if (listenSd == -1) //INVALID_SOCKET undef on Unix
@@ -203,18 +214,12 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         CW_Common_Die("can't create socket");
     }
 
-    CW_Platform_BindAndListen(listenSd, ip4Addr, port);
-    printf("Simple SSL server started on port %d\n", port);
+    CW_Platform_Bind(listenSd, ip4Addr, port);
+    printf("Simple DTLS server started on port %d\n", port);
 
     while (true)
     {
-        printf("Accepting new client\n");
-        int sd = CW_Platform_Accept(listenSd);
 
-        if (sd < 0)
-        {
-            continue;
-        }
         CW_Common_AllocLogMarkerBegin("Secure Socket");
         void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
@@ -292,8 +297,15 @@ int main(int argc, char** argv)
 
     uint32_t ip4Addr = 0;
 
-    cw_Server_TlsServer(ip4Addr, port);
-    cw_Server_DtlsServer(ip4Addr, port);
+    cw_Server_TlsServer(ip4Addr, port, false, false);
+    cw_Server_TlsServer(ip4Addr, port, false, true);
+    cw_Server_TlsServer(ip4Addr, port, true, false);
+    cw_Server_TlsServer(ip4Addr, port, true, true);
+
+    cw_Server_DtlsServer(ip4Addr, port, false, false);
+    cw_Server_DtlsServer(ip4Addr, port, false, true);
+    cw_Server_DtlsServer(ip4Addr, port, true, false);
+    cw_Server_DtlsServer(ip4Addr, port, true, true);
 
 
     CW_TlsLib_Shutdown();

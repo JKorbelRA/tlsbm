@@ -57,6 +57,9 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 ///
 //------------------------------------------------------------------------------
 void* CW_TlsLib_MakeSocketSecure(int sd,
+                                 void* pSecureCtx);
+
+void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
                                  void* pSecureCtx,
                                  void* pPeerAddr,
                                  size_t peerAddrSize);

@@ -138,13 +138,7 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
     return res;
 }
 
-
-//-----------------------------------------------------------------------------
-//
-// Shut the platform down.
-//
-//-----------------------------------------------------------------------------
-void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
+void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 {
     int on = 1;
     int len = sizeof(on);
@@ -162,7 +156,11 @@ void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port)
     {
         CW_Common_Die("can't bind socket\n");
     }
+}
 
+
+void CW_Platform_Listen(int sd)
+{
     if (listen(sd, SOMAXCONN) == -1)
     {
         CW_Common_Die("can't listen to socket\n");

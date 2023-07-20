@@ -17,6 +17,7 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 #include <crazywolf/Common.h>
@@ -64,11 +65,13 @@
 
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isPsk);
+                                bool isPsk,
+                                bool isRsa);
 
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isPsk);
+                                 bool isPsk,
+                                 bool isRsa);
 
 //-----------------------------------------------------------------------------
 // Variable definitions
@@ -135,7 +138,10 @@ static void cw_Client_SendToTestMsg(int sd,
 /// @return 0 on success
 ///
 //-----------------------------------------------------------------------------
-static void cw_Client_TlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
+static void cw_Client_TlsClient(uint32_t ip4Addr,
+                                uint16_t port,
+                                bool isPsk,
+                                bool isRsa)
 {
     printf("Connecting server\n");
 
@@ -153,21 +159,21 @@ static void cw_Client_TlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
 
     printf("Server %d:%d connected\n", ip4Addr, port);
 
+
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         CW_CACERT_PATH,
+                                                         pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVCERT_PATH,
+                                                         pCfg->pDevCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVKEY_PATH,
+                                                         pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         CW_CIPHER_SUITE,
-                                                         true);
+                                                         pCfg->pCipherSuite,
+                                                         false);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
 
-    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
-                                                        pSecurityCtx,
-                                                        NULL,
-                                                        0);
+    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -196,7 +202,10 @@ static void cw_Client_TlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
 /// @return 0 on success
 ///
 //-----------------------------------------------------------------------------
-static void cw_Client_DtlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
+static void cw_Client_DtlsClient(uint32_t ip4Addr,
+                                 uint16_t port,
+                                 bool isPsk,
+                                 bool isRsa)
 {
 
     int sd = CW_Platform_Socket(false);
@@ -206,23 +215,25 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr, uint16_t port, bool isPsk)
         CW_Common_Die("can't get sd");
     }
 
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         CW_CACERT_PATH,
+                                                         pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVCERT_PATH,
+                                                         pCfg->pDevCert,
                                                          TLSLIB_FILE_TYPE_PEM,
-                                                         CW_DEVKEY_PATH,
+                                                         pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
-                                                         CW_CIPHER_SUITE,
+                                                         pCfg->pCipherSuite,
                                                          false);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
 
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, ip4Addr, port);
-    void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
-                                                        pSecurityCtx,
-                                                        pPeerAddr,
-                                                        peerAddrSize);
+    void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(sd,
+                                                            pSecurityCtx,
+                                                            pPeerAddr,
+                                                            peerAddrSize);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
@@ -259,7 +270,7 @@ int main(int argc, char** argv)
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
     uint16_t port = SIMPLE_SSL_PORT;
-    char* pServerIp4 = SIMPLE_SSL_SERVER_ADDR;
+    char* pServerIp4;
 
     if (argc == 2)
     {
@@ -269,27 +280,22 @@ int main(int argc, char** argv)
     else
     {
         // tell user, server IP can be set
-        printf("USAGE: <simpleClient.exe> [serverIP], running with default %s\n", pServerIp4);
+        printf("USAGE: <simpleClient.exe> [serverIP]\n");
+        exit(-1);
     }
 
 
     uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
-#if defined(CW_ENV_TEST_TLS)
-#if defined(CW_ENV_TEST_PSK)
-    cw_Client_TlsClient(ip4Addr, port, true);
-#else
-    cw_Client_TlsClient(ip4Addr, port, false);
-#endif // defined(CW_ENV_TEST_PSK)
-#endif defined(CW_ENV_TEST_TLS)
+    cw_Client_TlsClient(ip4Addr, port, false, false);
+    cw_Client_TlsClient(ip4Addr, port, false, true);
+    cw_Client_TlsClient(ip4Addr, port, true, false);
+    cw_Client_TlsClient(ip4Addr, port, true, true);
 
-#if defined(CW_ENV_TEST_DTLS)
-#if defined(CW_ENV_TEST_PSK)
-    cw_Client_DtlsClient(ip4Addr, port, true);
-#else
-    cw_Client_DtlsClient(ip4Addr, port, false);
-#endif // defined(CW_ENV_TEST_PSK)
-#endif defined(CW_ENV_TEST_TLS)
+    cw_Client_DtlsClient(ip4Addr, port, false, false);
+    cw_Client_DtlsClient(ip4Addr, port, false, true);
+    cw_Client_DtlsClient(ip4Addr, port, true, false);
+    cw_Client_DtlsClient(ip4Addr, port, true, true);
 
     CW_Common_Allocaprint(pAlloca, stackMaxBytes);
     CW_Platform_FlushStdout();

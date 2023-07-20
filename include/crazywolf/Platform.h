@@ -34,7 +34,8 @@ void CW_Platform_Shutdown(void);
 
 int CW_Platform_Socket(bool isStream);
 int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port);
-void CW_Platform_BindAndListen(int sd, uint32_t ip4Addr, uint16_t port);
+void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port);
+void CW_Platform_Listen(int sd);
 int CW_Platform_Accept(int listenSd);
 void CW_Platform_CloseSocket(int sd);
 uint16_t CW_Platform_Htons(uint16_t hostNum);
