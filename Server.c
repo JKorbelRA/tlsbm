@@ -83,8 +83,8 @@ Msg_t cw_Server_inMsg;
 //------------------------------------------------------------------------------
 static void cw_Server_TlsServer(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isPsk,
-                                bool isRsa)
+                                bool isRsa,
+                                bool isPsk)
 {
 
     size_t stackMaxBytes = 50*1000;
@@ -191,8 +191,8 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 //------------------------------------------------------------------------------
 static void cw_Server_DtlsServer(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isPsk,
-                                 bool isRsa)
+                                 bool isRsa,
+                                 bool isPsk)
 {
 
     size_t stackMaxBytes = 50*1000;

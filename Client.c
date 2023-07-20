@@ -65,13 +65,13 @@
 
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isPsk,
-                                bool isRsa);
+                                bool isRsa,
+                                bool isPsk);
 
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isPsk,
-                                 bool isRsa);
+                                 bool isRsa,
+                                 bool isPsk);
 
 //-----------------------------------------------------------------------------
 // Variable definitions
@@ -140,8 +140,8 @@ static void cw_Client_SendToTestMsg(int sd,
 //-----------------------------------------------------------------------------
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isPsk,
-                                bool isRsa)
+                                bool isRsa,
+                                bool isPsk)
 {
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
@@ -211,8 +211,8 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 //-----------------------------------------------------------------------------
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isPsk,
-                                 bool isRsa)
+                                 bool isRsa,
+                                 bool isPsk)
 {
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
