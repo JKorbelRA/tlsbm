@@ -95,12 +95,12 @@ int CW_Platform_Socket(bool isStream)
     {
         int sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-        int flags = fcntl(sockFd, F_GETFL, 0);
+        int flags = fcntl(sd, F_GETFL, 0);
 
         if (flags >= 0)
         {
             flags |= (unsigned int)O_NONBLOCK;
-            fcntl(sockFd, F_SETFL, (int)flags);
+            fcntl(sd, F_SETFL, (int)flags);
         }
 
         return sd;
