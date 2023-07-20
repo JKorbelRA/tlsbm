@@ -283,6 +283,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);
         CW_Platform_FlushStdout();
+
+        break;
     }
 
     CW_Platform_DeletePeerAddr4(pPeerAddr);

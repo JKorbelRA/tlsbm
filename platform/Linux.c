@@ -247,6 +247,11 @@ int CW_Platform_Recvfrom(int sd,
 
 }
 
+void CW_Platform_Sleep(uint32_t s)
+{
+    sleep(s);
+}
+
 int CW_Platform_RecvfromPeek(int sd,
                              uint8_t* pData,
                              size_t dataBytes,

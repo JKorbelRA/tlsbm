@@ -48,6 +48,7 @@ int CW_Platform_RecvfromPeek(int sd,
                              void* pPeerAddr,
                              size_t* pPeerAddrSize);
 void CW_Platform_CloseSocket(int sd);
+void CW_Platform_Sleep(uint32_t s);
 uint16_t CW_Platform_Htons(uint16_t hostNum);
 uint16_t CW_Platform_Ntohs(uint16_t networkNum);
 uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str);

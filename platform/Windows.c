@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include <ws2tcpip.h>
+#include <windows.h>
 
 #include <crazywolf/Common.h>
 #include <crazywolf/Platform.h>
@@ -128,6 +129,12 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
                       (struct sockaddr*)&srvAddr,
                       sizeof(srvAddr)) == -1;
     return res;
+}
+
+
+void CW_Platform_Sleep(uint32_t s)
+{
+    Sleep(s*1000);
 }
 
 void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)

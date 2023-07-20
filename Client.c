@@ -288,14 +288,28 @@ int main(int argc, char** argv)
     uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
     cw_Client_TlsClient(ip4Addr, port, false, false);
+    CW_Platform_Sleep(5);
+
     cw_Client_TlsClient(ip4Addr, port, false, true);
+    CW_Platform_Sleep(5);
+
     cw_Client_TlsClient(ip4Addr, port, true, false);
+    CW_Platform_Sleep(5);
+
     cw_Client_TlsClient(ip4Addr, port, true, true);
+    CW_Platform_Sleep(5);
 
     cw_Client_DtlsClient(ip4Addr, port, false, false);
+    CW_Platform_Sleep(5);
+
     cw_Client_DtlsClient(ip4Addr, port, false, true);
+    CW_Platform_Sleep(5);
+
     cw_Client_DtlsClient(ip4Addr, port, true, false);
+    CW_Platform_Sleep(5);
+
     cw_Client_DtlsClient(ip4Addr, port, true, true);
+    CW_Platform_Sleep(5);
 
     CW_Common_Allocaprint(pAlloca, stackMaxBytes);
     CW_Platform_FlushStdout();
