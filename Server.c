@@ -86,6 +86,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
                                 bool isRsa,
                                 bool isPsk)
 {
+    CW_Common_AllocLogMarkerBegin("Context");
 
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
@@ -121,7 +122,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
         {
             continue;
         }
-        CW_Common_AllocLogMarkerBegin("Secure Socket");
+        CW_Common_AllocLogMarkerEnd("Context");
         void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
                                                             pSecurityCtx);
 
@@ -165,8 +166,6 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-
-        CW_Common_AllocLogMarkerEnd("Secure Socket");
         CW_Platform_CloseSocket(sd);
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);

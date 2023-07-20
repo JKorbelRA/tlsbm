@@ -143,6 +143,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 bool isRsa,
                                 bool isPsk)
 {
+    CW_Common_AllocLogMarkerBegin("Context");
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
     printf("Connecting server\n");
@@ -174,7 +175,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                                          TLSLIB_FILE_TYPE_DER,
                                                          pCfg->pCipherSuite,
                                                          true);
-    CW_Common_AllocLogMarkerBegin("Secure Socket");
+    CW_Common_AllocLogMarkerEnd("Context");
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
@@ -189,7 +190,6 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                           sizeof("Hello world")-1);
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-    CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
 
@@ -260,7 +260,6 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                             sizeof("Hello world")-1);
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-    CW_Common_AllocLogMarkerEnd("Secure Socket");
     CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(sd);
