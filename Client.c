@@ -163,6 +163,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          pCfg->pCaCert,
@@ -224,6 +225,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
     }
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
+    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          pCfg->pCaCert,
