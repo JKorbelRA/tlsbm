@@ -108,8 +108,8 @@ int CW_Platform_Socket(bool isStream)
     else
     {
         int sd = (int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        unsigned long mode = 1;
-        ioctlsocket(sd, FIONBIO, &mode);
+        /*unsigned long mode = 1;
+        ioctlsocket(sd, FIONBIO, &mode);*/
 
         return sd;
     }
