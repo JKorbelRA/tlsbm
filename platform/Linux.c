@@ -100,7 +100,7 @@ int CW_Platform_Socket(bool isStream)
 void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port)
 {
     struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
-    if (pPeerAddr != NULL)
+    if (pPeerAddr == NULL)
     {
         CW_Common_Die("peer address allocation failed\n");
     }

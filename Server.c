@@ -176,6 +176,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     }
 
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
+    CW_Platform_CloseSocket(listenSd);
 } // End: cw_Server_TlsServer()
 
 
@@ -292,6 +293,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
     CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
+    CW_Platform_CloseSocket(sd);
 } // End: cw_Server_DtlsServer()
 
 
