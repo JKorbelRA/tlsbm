@@ -311,44 +311,44 @@ int main(int argc, char** argv)
     uint32_t ip4Addr = 0; // ANY
 
     printf("Starting TLS server, no PSK, ECC\n");
-    CW_Common_AllocLogMarkerBegin("TLS, CERT, ECC");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
     cw_Server_TlsServer(ip4Addr, port, false, false);
-    CW_Common_AllocLogMarkerEnd("TLS, CERT, ECC");
+    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC");
 
-    printf("Starting TLS server, PSK, ECC\n");
-    CW_Common_AllocLogMarkerBegin("TLS, PSK, ECC");
+    printf("Starting TLS server + PSK + ECC\n");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + ECC");
     cw_Server_TlsServer(ip4Addr, port, false, true);
-    CW_Common_AllocLogMarkerEnd("TLS, PSK, ECC");
+    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + ECC");
 
     printf("Starting TLS server, no PSK, RSA\n");
-    CW_Common_AllocLogMarkerBegin("TLS, CERT, RSA");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + RSA");
     cw_Server_TlsServer(ip4Addr, port, true, false);
-    CW_Common_AllocLogMarkerEnd("TLS, CERT, RSA");
+    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + RSA");
 
-    printf("Starting TLS server, PSK, DHE\n");
-    CW_Common_AllocLogMarkerBegin("TLS, PSK, DHE");
+    printf("Starting TLS server + PSK + DHE\n");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
     cw_Server_TlsServer(ip4Addr, port, true, true);
-    CW_Common_AllocLogMarkerEnd("TLS, PSK, DHE");
+    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
 
     printf("Starting DTLS server, no PSK, ECC\n");
-    CW_Common_AllocLogMarkerBegin("DTLS, CERT, ECC");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
     cw_Server_DtlsServer(ip4Addr, port, false, false);
-    CW_Common_AllocLogMarkerEnd("DTLS, CERT, ECC");
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC");
 
-    printf("Starting DTLS server, PSK, ECC\n");
-    CW_Common_AllocLogMarkerBegin("DTLS, PSK, ECC");
+    printf("Starting DTLS server + PSK + ECC\n");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + ECC");
     cw_Server_DtlsServer(ip4Addr, port, false, true);
-    CW_Common_AllocLogMarkerEnd("DTLS, PSK, ECC");
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + ECC");
 
     printf("Starting DTLS server, no PSK, RSA\n");
-    CW_Common_AllocLogMarkerBegin("DTLS, CERT, RSA");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + RSA");
     cw_Server_DtlsServer(ip4Addr, port, true, false);
-    CW_Common_AllocLogMarkerEnd("DTLS, CERT, RSA");
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + RSA");
 
-    printf("Starting DTLS server, PSK, DHE\n");
-    CW_Common_AllocLogMarkerBegin("DTLS, PSK, DHE");
+    printf("Starting DTLS server + PSK + DHE\n");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + DHE");
     cw_Server_DtlsServer(ip4Addr, port, true, true);
-    CW_Common_AllocLogMarkerEnd("DTLS, PSK, DHE");
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + DHE");
 
 
     CW_TlsLib_Shutdown();
