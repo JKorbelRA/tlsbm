@@ -162,7 +162,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          pCfg->pDevCert,
@@ -170,7 +170,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                                          pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
                                                          pCfg->pCipherSuite,
-                                                         false);
+                                                         true);
     CW_Common_AllocLogMarkerBegin("Secure Socket");
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
