@@ -93,7 +93,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
     printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          pCfg->pDevCert,
@@ -202,7 +202,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
     printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          pCfg->pCaCert,
                                                          TLSLIB_FILE_TYPE_PEM,
                                                          pCfg->pDevCert,
