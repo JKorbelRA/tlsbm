@@ -41,29 +41,29 @@ include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/incl
 
 # LIBRARIES
 
-add_subdirectory(wolfssl)
+## add_subdirectory(wolfssl)
+## 
+## add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-wolfssl-client crazywolf-common tlslib-wolfssl crazywolf-common)
+## 
+## add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
+## 
+## target_link_libraries(${PROJECT_NAME}-wolfssl-server crazywolf-common tlslib-wolfssl crazywolf-common)
 
-add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
+# ------------------------------------------------------------------------------
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-client crazywolf-common tlslib-wolfssl crazywolf-common)
+add_subdirectory(mbedtls)
 
-add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
+add_executable(${PROJECT_NAME}-mbedtls-client ${CLIENT_SRC} ${COMMON_SRC})
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-server crazywolf-common tlslib-wolfssl crazywolf-common)
+target_link_libraries(${PROJECT_NAME}-mbedtls-client tlslib-mbedtls)
 
-## # ------------------------------------------------------------------------------
-## 
-## add_subdirectory(mbedtls)
-## 
-## add_executable(${PROJECT_NAME}-mbedtls-client ${CLIENT_SRC} ${COMMON_SRC})
-## 
-## target_link_libraries(${PROJECT_NAME}-mbedtls-client tlslib-mbedtls)
-## 
-## add_executable(${PROJECT_NAME}-mbedtls-server ${SERVER_SRC} ${COMMON_SRC})
-## 
-## target_link_libraries(${PROJECT_NAME}-mbedtls-server tlslib-mbedtls)
-## 
-## # ------------------------------------------------------------------------------
+add_executable(${PROJECT_NAME}-mbedtls-server ${SERVER_SRC} ${COMMON_SRC})
+
+target_link_libraries(${PROJECT_NAME}-mbedtls-server tlslib-mbedtls)
+
+# ------------------------------------------------------------------------------
 ## 
 ## 
 ## add_subdirectory(cyclonessl)

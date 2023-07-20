@@ -13,15 +13,6 @@
 // Include files
 //------------------------------------------------------------------------------
 #include <stdio.h>
-#include <limits.h>
-#include <fcntl.h>
-
-#ifdef WIN32
-#include <ws2tcpip.h>
-#else
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
 
 #include <crazywolf/Common.h>
 #include <crazywolf/TlsLib.h>
