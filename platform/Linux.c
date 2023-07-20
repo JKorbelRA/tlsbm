@@ -93,7 +93,17 @@ int CW_Platform_Socket(bool isStream)
     }
     else
     {
-        return socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        int sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+        int flags = fcntl(sockFd, F_GETFL, 0);
+
+        if (flags >= 0)
+        {
+            flags |= (unsigned int)O_NONBLOCK;
+            fcntl(sockFd, F_SETFL, (int)flags);
+        }
+
+        return sd;
     }
 }
 
