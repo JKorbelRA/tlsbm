@@ -110,7 +110,6 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 
     CW_Platform_Bind(listenSd, ip4Addr, port);
     CW_Platform_Listen(listenSd);
-    printf("Simple TLS server started on port %d\n", port);
 
     while (true)
     {
@@ -171,6 +170,8 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);
         CW_Platform_FlushStdout();
+
+        break;
     }
 
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
@@ -215,7 +216,6 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     }
 
     CW_Platform_Bind(sd, ip4Addr, port);
-    printf("Simple DTLS server started on port %d\n", port);
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, 0, 0);
 
