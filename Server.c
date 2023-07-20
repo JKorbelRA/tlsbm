@@ -100,7 +100,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
                                                          pCfg->pDevKey,
                                                          TLSLIB_FILE_TYPE_DER,
                                                          pCfg->pCipherSuite,
-                                                         false);
+                                                         true);
 
     int listenSd = CW_Platform_Socket(true);
     if (listenSd == -1) //INVALID_SOCKET undef on Unix
