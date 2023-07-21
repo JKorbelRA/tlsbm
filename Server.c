@@ -123,6 +123,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
             continue;
         }
         CW_Common_AllocLogMarkerEnd("Context");
+        CW_Common_AllocLogMarkerBegin("Handshake");
         void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
                                                             pSecurityCtx);
 
@@ -133,6 +134,9 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
             continue;
         }
 
+
+        CW_Common_AllocLogMarkerEnd("Handshake");
+        CW_Common_AllocLogMarkerBegin("Message");
         while (res == 0)
         {
             uint16_t payloadBytesBe = 0;
@@ -163,6 +167,8 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
                 printf("Recv hdr failure\n");
             }
         }
+
+        CW_Common_AllocLogMarkerEnd("Message");
 
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
@@ -236,6 +242,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         }
 
         CW_Common_AllocLogMarkerEnd("Context");
+        CW_Common_AllocLogMarkerBegin("Handshake");
         int clientSd = listenSd;
         void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&clientSd,
                                                                 pSecurityCtx,
@@ -260,6 +267,9 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
             CW_Platform_CloseSocket(clientSd);
             continue;
         }
+
+        CW_Common_AllocLogMarkerEnd("Handshake");
+        CW_Common_AllocLogMarkerBegin("Message");
 
         while (res == 0)
         {
@@ -291,6 +301,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
                 printf("Recv hdr failure\n");
             }
         }
+
+        CW_Common_AllocLogMarkerEnd("Message");
 
 
         CW_TlsLib_UnmakeSocketSecure(clientSd, pSecureSocketCtx);

@@ -176,10 +176,13 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                                          pCfg->pCipherSuite,
                                                          true);
     CW_Common_AllocLogMarkerEnd("Context");
+    CW_Common_AllocLogMarkerBegin("Handshake");
 
     void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd, pSecurityCtx);
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
+    CW_Common_AllocLogMarkerEnd("Handshake");
+    CW_Common_AllocLogMarkerBegin("Message");
 
 
     // Let's test!
@@ -188,6 +191,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                           pSecureSocketCtx,
                           "Hello world",
                           sizeof("Hello world")-1);
+    CW_Common_AllocLogMarkerEnd("Message");
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
     CW_Platform_CloseSocket(sd);
@@ -239,6 +243,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                                          pCfg->pCipherSuite,
                                                          false);
     CW_Common_AllocLogMarkerEnd("Context");
+    CW_Common_AllocLogMarkerBegin("Handshake");
 
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, ip4Addr, port);
@@ -249,6 +254,8 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
 
     CW_TlsLib_ClientHandshake(sd, pSecureSocketCtx);
 
+    CW_Common_AllocLogMarkerEnd("Handshake");
+    CW_Common_AllocLogMarkerBegin("Message");
 
     // Let's test!
     printf("Hello world test\n");
@@ -258,6 +265,8 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
                             port,
                             "Hello world",
                             sizeof("Hello world")-1);
+
+    CW_Common_AllocLogMarkerEnd("Message");
 
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
     CW_Platform_CloseSocket(sd);
