@@ -238,6 +238,9 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
     mbedtls_ssl_conf_rng(&pCtx->sslCfg, mbedtls_ctr_drbg_random, &cw_TlsLib_ctrDrbg);
     mbedtls_ssl_conf_dbg(&pCtx->sslCfg, cw_TlsLib_Debug, stdout);
+#if defined(CW_ENV_DEBUG_ENABLE)
+    mbedtls_debug_set_threshold(4);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
 
     const char* pPskIdentity = CW_Common_GetPskIdentity();
