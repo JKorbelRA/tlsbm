@@ -1,9 +1,9 @@
 //==============================================================================
 ///
-/// @file client.c
+/// @file TlsLib.c
 ///
 ///
-/// @brief A test TLS client using wolfSSL library.
+/// @brief A test TLS client using mbedTLS library.
 ///
 /// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
 /// All rights reserved.
@@ -332,7 +332,7 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 // Makes a sd secure. Returns secure sd context handle.
 //
 //--------------------------------------------------------------------------
-void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
+void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                                      void* pSecureCtx,
                                      void* pPeerAddr,
                                      size_t peerAddrSize)
@@ -353,7 +353,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
                              mbedtls_timing_set_delay,
                              mbedtls_timing_get_delay);
 
-    if (pCtx->isServer)
+    /*if (pCtx->isServer)
     {
         if (mbedtls_ssl_set_client_transport_id(&pSecureSocketContext->sslCtx,
                                                 pPeerAddr,
@@ -361,18 +361,22 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
         {
             CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
         }
-    }
+    }*/
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
 
-    CW_Platform_ConnectPa(sd, pPeerAddr, peerAddrSize);
+    CW_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
 
-    pSecureSocketContext->netCtx.fd = sd;
+    pSecureSocketContext->netCtx.fd = *pSd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,
                         &pSecureSocketContext->netCtx,
                         mbedtls_net_send,
                         mbedtls_net_recv,
                         mbedtls_net_recv_timeout);
+    if (pCtx->isServer)
+    {
+        *pSd = -1;
+    }
 
     return pSecureSocketContext;
 } // End: CW_TlsLib_MakeSocketSecure()

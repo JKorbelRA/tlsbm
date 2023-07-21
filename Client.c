@@ -242,7 +242,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
 
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, ip4Addr, port);
-    void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(sd,
+    void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&sd,
                                                             pSecurityCtx,
                                                             pPeerAddr,
                                                             peerAddrSize);

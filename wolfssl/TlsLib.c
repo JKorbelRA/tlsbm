@@ -214,7 +214,7 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 // Makes a sd secure. Returns secure sd context handle.
 //
 //--------------------------------------------------------------------------
-void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
+void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                                      void* pSecureCtx,
                                      void* pPeerAddr,
                                      size_t peerAddrSize)
@@ -226,7 +226,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
         CW_Common_Die("wolfSSL_new error");
     }
 
-    if (wolfSSL_set_fd(pSsl, sd) != WOLFSSL_SUCCESS)
+    if (wolfSSL_set_fd(pSsl, *pSd) != WOLFSSL_SUCCESS)
     {
         CW_Common_Die("wolfSSL_set_fd error");
     }
