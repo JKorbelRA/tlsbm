@@ -309,7 +309,7 @@ int main(int argc, char** argv)
 
     uint16_t port = SIMPLE_SSL_PORT;
     uint32_t ip4Addr = 0; // ANY
-
+/*
     printf("Starting TLS server, no PSK, ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
     cw_Server_TlsServer(ip4Addr, port, false, false);
@@ -328,7 +328,7 @@ int main(int argc, char** argv)
     printf("Starting TLS server + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
     cw_Server_TlsServer(ip4Addr, port, true, true);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
+    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");*/
 
     printf("Starting DTLS server, no PSK, ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
