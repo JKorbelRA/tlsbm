@@ -15,9 +15,8 @@ endif()
 
 add_definitions(-DMBEDTLS_CONFIG_FILE="user_settings.h")
 
-## //#define MBEDTLS_SSL_SESSION_TICKETS
-
-set(MBEDTLS_SOURCE "C:/share/gitlab/mbedtls-3.4.0" CACHE PATH "Path to mbedtls sources")
+option(ENABLE_PROGRAMS "" OFF)
+option(ENABLE_TESTING "" OFF)
 
 include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include ${MBEDTLS_SOURCE}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
