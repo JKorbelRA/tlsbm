@@ -370,10 +370,10 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
     CW_Common_GetIp4Port(&ip4Addr, &port);
 
     CW_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
-    if (pCtx->isServer)
+    /*if (pCtx->isServer)
     {
         CW_Platform_Bind(*pSd, ip4Addr, port);
-    }
+    }*/
 
     pSecureSocketContext->netCtx.fd = *pSd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,

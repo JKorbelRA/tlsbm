@@ -219,7 +219,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         CW_Common_Die("can't create socket");
     }
 
-    CW_Platform_Bind(listenSd, ip4Addr, port);
+    CW_Platform_Bind(listenSd, 0, port);
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, 0, 0);
 
@@ -251,7 +251,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
                 CW_Common_Die("can't create socket");
             }
 
-            CW_Platform_Bind(listenSd, ip4Addr, port);
+            CW_Platform_Bind(listenSd, 0, port);
         }
 
         int res = CW_TlsLib_ServerHandshake(clientSd, pSecureSocketCtx);

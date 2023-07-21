@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <malloc.h>
+#include <errno.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -167,7 +168,10 @@ void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
     }
 
     on = 1;
-    setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0)
+    {
+        CW_Common_Die("setsockopt SO_REUSEPORT failed\n");
+    }
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -176,6 +180,7 @@ void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 
     if (bind(sd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
+        printf("bind error %d", errno);
         CW_Common_Die("can't bind socket\n");
     }
 }
