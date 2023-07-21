@@ -213,19 +213,19 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
                                                          pCfg->pCipherSuite,
                                                          false);
 
-    int sd = CW_Platform_Socket(false);
-    if (sd == -1) //INVALID_SOCKET undef on Unix
+    int listenSd = CW_Platform_Socket(false);
+    if (listenSd == -1) //INVALID_SOCKET undef on Unix
     {
         CW_Common_Die("can't create socket");
     }
 
-    CW_Platform_Bind(sd, ip4Addr, port);
+    CW_Platform_Bind(listenSd, ip4Addr, port);
     size_t peerAddrSize = 0;
     void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, 0, 0);
 
     while (true)
     {
-        int peekBytes = CW_Platform_RecvfromPeek(sd,
+        int peekBytes = CW_Platform_RecvfromPeek(listenSd,
                                                  cw_Server_inMsg.msg,
                                                  sizeof(cw_Server_inMsg.msg),
                                                  pPeerAddr,
@@ -236,40 +236,42 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         }
 
         CW_Common_AllocLogMarkerEnd("Context");
-        //int oldSd = sd;
-        void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&sd,
+        int clientSd = listenSd;
+        void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&clientSd,
                                                                 pSecurityCtx,
                                                                 pPeerAddr,
                                                                 peerAddrSize);
-        /*if (oldSd != sd)
+        if (listenSd != clientSd)
         {
-            int sd = CW_Platform_Socket(false);
-            if (sd == -1) //INVALID_SOCKET undef on Unix
+            // Weird accept way follows (mbedTLS):
+
+            listenSd = CW_Platform_Socket(false);
+            if (listenSd == -1) //INVALID_SOCKET undef on Unix
             {
                 CW_Common_Die("can't create socket");
             }
 
-            CW_Platform_Bind(sd, ip4Addr, port);
-        }*/
+            CW_Platform_Bind(listenSd, ip4Addr, port);
+        }
 
-        int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
+        int res = CW_TlsLib_ServerHandshake(clientSd, pSecureSocketCtx);
         if (res != 0)
         {
-            CW_Platform_CloseSocket(sd);
+            CW_Platform_CloseSocket(clientSd);
             continue;
         }
 
         while (res == 0)
         {
             uint16_t payloadBytesBe = 0;
-            res = CW_TlsLib_Recv(sd,
+            res = CW_TlsLib_Recv(clientSd,
                                  pSecureSocketCtx,
                                  (uint8_t*)&payloadBytesBe,
                                  2);
             if (res == 0)
             {
                 size_t payloadBytes = CW_Platform_Ntohs(payloadBytesBe);
-                res = CW_TlsLib_Recv(sd,
+                res = CW_TlsLib_Recv(clientSd,
                                      pSecureSocketCtx,
                                      (uint8_t*)&cw_Server_inMsg.str.payload,
                                      payloadBytes);
@@ -291,8 +293,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         }
 
 
-        CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-        CW_Platform_CloseSocket(sd);
+        CW_TlsLib_UnmakeSocketSecure(clientSd, pSecureSocketCtx);
+        CW_Platform_CloseSocket(clientSd);
 
         CW_Common_Allocaprint(pAlloca, stackMaxBytes);
         CW_Platform_FlushStdout();
@@ -302,7 +304,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
     CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
-    CW_Platform_CloseSocket(sd);
+    CW_Platform_CloseSocket(listenSd);
 } // End: cw_Server_DtlsServer()
 
 
