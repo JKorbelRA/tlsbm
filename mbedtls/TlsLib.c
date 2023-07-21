@@ -56,21 +56,9 @@ typedef struct
     mbedtls_pk_context devKey;
     mbedtls_timing_delay_context timer;
     bool isServer;
-} MbedTlsContext_t;
-
-typedef struct
-{
-
-    mbedtls_ssl_config sslCfg;
-    mbedtls_x509_crt caCert;
-    mbedtls_x509_crt devCert;
-    mbedtls_pk_context devKey;
-    mbedtls_timing_delay_context timer;
-    bool isServer;
-
     // DTLS
     mbedtls_ssl_cookie_ctx cookies;
-} MbedDtlsContext_t;
+} MbedTlsContext_t;
 
 typedef struct
 {
@@ -79,14 +67,6 @@ typedef struct
     void* pPeerAddr;
     size_t peerAddrSize;
 } MbedTlsObject_t;
-
-typedef struct
-{
-    mbedtls_ssl_context sslCtx;
-    mbedtls_net_context netCtx;
-    void* pPeerAddr;
-    size_t peerAddrSize;
-} MbedDtlsObject_t;
 
 
 //-----------------------------------------------------------------------------
@@ -159,15 +139,15 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                       const char* pCipherList,
                                       bool isTls)
 {
-    MbedDtlsContext_t* pCtx = NULL;
+    MbedTlsContext_t* pCtx = NULL;
 
     if (isTls)
     {
-        pCtx = (MbedDtlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
+        pCtx = (MbedTlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
     }
     else
     {
-        pCtx = (MbedDtlsContext_t*)CW_Common_Malloc(sizeof(MbedDtlsContext_t));
+        pCtx = (MbedTlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
     }
 
     if (pCtx == 0)
@@ -301,7 +281,7 @@ static void cw_TlsLib_Debug(void *ctx, int level,
 void* CW_TlsLib_MakeSocketSecure(int sd,
                                  void* pSecureCtx)
 {
-    MbedDtlsContext_t* pCtx = (MbedDtlsContext_t*)pSecureCtx;
+    MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
     MbedTlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedTlsObject_t));
 
@@ -340,9 +320,9 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                                      void* pPeerAddr,
                                      size_t peerAddrSize)
 {
-    MbedDtlsContext_t* pCtx = (MbedDtlsContext_t*)pSecureCtx;
+    MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
-    MbedDtlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedDtlsObject_t));
+    MbedTlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedTlsObject_t));
 
     mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
@@ -394,7 +374,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 //------------------------------------------------------------------------------
 void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
 {
-    MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
     int ret = 0;
     /* No error checking, the connection might be closed already */
@@ -423,6 +403,7 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
     mbedtls_x509_crt_free(&pCtx->caCert);
     mbedtls_x509_crt_free(&pCtx->devCert);
     mbedtls_pk_free(&pCtx->devKey);
+    mbedtls_ssl_cookie_free(&pCtx->cookies);
 
     CW_Common_Free(pCtx);
 } // End: CW_TlsLib_DestroySecureContext()
@@ -435,7 +416,7 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
 //------------------------------------------------------------------------------
 void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 {
-    MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
     int ret = 0;
     do
@@ -478,7 +459,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 //------------------------------------------------------------------------------
 int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 {
-    MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
     bool retry = true;
     int ret = 0;
 
@@ -541,7 +522,7 @@ void CW_TlsLib_SendToAll(int sd,
                          uint8_t* pData,
                          size_t dataBytes)
 {
-    MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
     int ret = 0;
     do {
@@ -562,7 +543,7 @@ int CW_TlsLib_Recv(int sd,
                    uint8_t* pData,
                    size_t dataBytes)
 {
-    MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
     int ret = 0;
     do
