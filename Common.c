@@ -148,10 +148,12 @@ void* CW_Common_Malloc(unsigned long size)
         CW_Common_Die("cannot write heap usage record line 4 malloc");
     }
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     if (size > 512)
     {
         printf("Allocating %zuB\n", size);
     }
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
     fflush(cw_Common_heapCsv);
