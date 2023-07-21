@@ -11,7 +11,10 @@ set(C_STANDARD 99)
 
 if (CW_ENV_DEBUG_ENABLE)
 add_definitions(-DMBEDTLS_DEBUG_C)
+add_definitions(-MBEDTLS_CONFIG_FILE "user_settings.h")
 endif()
+
+## //#define MBEDTLS_SSL_SESSION_TICKETS
 
 set(MBEDTLS_SOURCE "C:/share/gitlab/mbedtls-3.4.0" CACHE PATH "Path to mbedtls sources")
 
