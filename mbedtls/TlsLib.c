@@ -56,6 +56,7 @@ typedef struct
     mbedtls_pk_context devKey;
     mbedtls_timing_delay_context timer;
     bool isServer;
+    bool isTls;
     // DTLS
     mbedtls_ssl_cookie_ctx cookies;
 } MbedTlsContext_t;
@@ -258,6 +259,7 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     }
 
     pCtx->isServer = isServer;
+    pCtx->isServer = isTls;
 
     return pCtx;
 } // End: CW_TlsLib_CreateSecurityContext()
@@ -349,10 +351,6 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
     CW_Common_GetIp4Port(&ip4Addr, &port);
 
     CW_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
-    /*if (pCtx->isServer)
-    {
-        CW_Platform_Bind(*pSd, ip4Addr, port);
-    }*/
 
     pSecureSocketContext->netCtx.fd = *pSd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,
@@ -403,7 +401,11 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
     mbedtls_x509_crt_free(&pCtx->caCert);
     mbedtls_x509_crt_free(&pCtx->devCert);
     mbedtls_pk_free(&pCtx->devKey);
-    mbedtls_ssl_cookie_free(&pCtx->cookies);
+
+    if (!pCtx->isTls)
+    {
+        mbedtls_ssl_cookie_free(&pCtx->cookies);
+    }
 
     CW_Common_Free(pCtx);
 } // End: CW_TlsLib_DestroySecureContext()
@@ -424,31 +426,6 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
         ret = mbedtls_ssl_handshake(&pSsl->sslCtx);
     } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
             ret == MBEDTLS_ERR_SSL_WANT_WRITE);
-
-#if 0
-    uint32_t flags;
-    /* In real life, we would have used MBEDTLS_SSL_VERIFY_REQUIRED so that the
-     * handshake would not succeed if the peer's cert is bad.  Even if we used
-     * MBEDTLS_SSL_VERIFY_OPTIONAL, we would bail out here if ret != 0 */
-    if ((flags = mbedtls_ssl_get_verify_result(&pSsl->sslCtx)) != 0)
-    {
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
-        char vrfy_buf[512];
-#endif
-
-        printf(" failed\n");
-
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
-        mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "  ! ", flags);
-
-        printf("%s\n", vrfy_buf);
-#endif
-    }
-    else
-    {
-        printf(" ok\n");
-    }
-#endif // 0
 } // End: CW_TlsLib_ClientHandshake()
 
 
