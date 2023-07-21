@@ -19,6 +19,7 @@
 
 
 #include <crazywolf/Common.h>
+#include <crazywolf/Platform.h>
 #include <crazywolf/TlsLib.h>
 #include <crazywolf/Environment.h> // Generated header, look into CMake.
 
