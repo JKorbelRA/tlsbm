@@ -303,7 +303,7 @@ int main(int argc, char** argv)
 
     CW_Common_SetIp4Port(ip4Addr, port);
 
-    /*printf("Starting TLS client + CERT + ECC\n");
+    printf("Starting TLS client + CERT + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
     cw_Client_TlsClient(ip4Addr, port, false, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC");
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
     cw_Client_TlsClient(ip4Addr, port, true, true);
     CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
     printf("Sleep 5s before next test...\n");
-    CW_Platform_Sleep(5);*/
+    CW_Platform_Sleep(5);
 
     printf("Starting DTLS client + CERT + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
