@@ -161,11 +161,13 @@ int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
 void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 {
     int on = 1;
-    int len = sizeof(on);
-    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, len) < 0)
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
     {
         CW_Common_Die("setsockopt SO_REUSEADDR failed\n");
     }
+
+    on = 1;
+    setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
