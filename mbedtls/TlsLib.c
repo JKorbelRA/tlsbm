@@ -365,7 +365,12 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
 
+    uint32_t ip4Addr;
+    uint16_t port;
+    CW_Common_GetIp4Port(&ip4Addr, &port);
+
     CW_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
+    CW_Platform_Bind(*pSd, ip4Addr, port);
 
     pSecureSocketContext->netCtx.fd = *pSd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,
@@ -373,6 +378,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                         mbedtls_net_send,
                         mbedtls_net_recv,
                         mbedtls_net_recv_timeout);
+    *pSd = -1;
 
     return pSecureSocketContext;
 } // End: CW_TlsLib_MakeSocketSecure()

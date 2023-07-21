@@ -301,6 +301,7 @@ int main(int argc, char** argv)
 
     uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
 
+    CW_Common_SetIp4Port(ip4Addr, port);
 
     /*printf("Starting TLS client + CERT + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");

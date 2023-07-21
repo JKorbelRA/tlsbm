@@ -75,5 +75,7 @@ uint8_t* CW_Common_GetPsk(size_t* pPskBytes);
 void  CW_Common_AllocLogMarkerBegin(const char* pMarker);
 void  CW_Common_AllocLogMarkerEnd(const char* pMarker);
 SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa);
+void CW_Common_SetIp4Port(uint32_t ip4Addr, uint16_t port);
+void CW_Common_GetIp4Port(uint32_t* pIp4Addr, uint16_t* pPort);
 
 #endif // !defined(CW_COMMON_H)

@@ -51,6 +51,10 @@
 
 static FILE* cw_Common_heapCsv;
 
+static uint32_t cw_Common_ip4Addr;
+
+static uint16_t cw_Common_port;
+
 static uint8_t cw_Common_psk[] = {
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
@@ -244,4 +248,18 @@ SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa)
     int id = ((isRsa == true) << 1) | (isPsk == true);
 
     return &cw_Common_suiteCfgs[id];
+}
+
+
+void CW_Common_SetIp4Port(uint32_t ip4Addr, uint16_t port)
+{
+    cw_Common_ip4Addr = ip4Addr;
+    cw_Common_port = port;
+}
+
+
+void CW_Common_GetIp4Port(uint32_t* pIp4Addr, uint16_t* pPort)
+{
+    *pIp4Addr = cw_Common_ip4Addr;
+    *pPort = cw_Common_port;
 }

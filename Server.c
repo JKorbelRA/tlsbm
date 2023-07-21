@@ -321,7 +321,25 @@ int main(int argc, char** argv)
     CW_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;
-    uint32_t ip4Addr = 0; // ANY
+    char* pServerIp4;
+
+    if (argc == 2)
+    {
+        // use argv[1] as server IP
+        pServerIp4 = argv[1];
+    }
+    else
+    {
+        // tell user, server IP can be set
+        printf("USAGE: <crazywolf-XX-server.exe> [server_ip]\n");
+        exit(-1);
+    }
+
+    uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
+
+
+    CW_Common_SetIp4Port(ip4Addr, port);
+
 /*
     printf("Starting TLS server, no PSK, ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
