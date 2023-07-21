@@ -480,21 +480,26 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 {
     MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
-
     int ret = 0;
-    do
+    while(ret == 0)
     {
-        ret = mbedtls_ssl_handshake(&pSsl->sslCtx);
-    } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
-             ret == MBEDTLS_ERR_SSL_WANT_WRITE);
 
-    if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
-    {
-        printf("ERROR hello verification requested\n");
-    }
-    else if (ret != 0)
-    {
-        printf("ERROR mbedtls_ssl_handshake error\n");
+        do
+        {
+            ret = mbedtls_ssl_handshake(&pSsl->sslCtx);
+        } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
+                ret == MBEDTLS_ERR_SSL_WANT_WRITE);
+
+        if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
+        {
+            mbedtls_ssl_session_reset(&pSsl->sslCtx);
+            ret = 0;
+            printf("hello verification requested\n");
+        }
+        else if (ret != 0)
+        {
+            printf("ERROR mbedtls_ssl_handshake error\n");
+        }
     }
 
     return ret;
