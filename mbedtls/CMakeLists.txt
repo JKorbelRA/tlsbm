@@ -11,8 +11,9 @@ set(C_STANDARD 99)
 
 if (CW_ENV_DEBUG_ENABLE)
 add_definitions(-DMBEDTLS_DEBUG_C)
-add_definitions(-DMBEDTLS_CONFIG_FILE="user_settings.h")
 endif()
+
+add_definitions(-DMBEDTLS_CONFIG_FILE="user_settings.h")
 
 ## //#define MBEDTLS_SSL_SESSION_TICKETS
 
