@@ -353,7 +353,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                              mbedtls_timing_set_delay,
                              mbedtls_timing_get_delay);
 
-    /*if (pCtx->isServer)
+    if (pCtx->isServer)
     {
         if (mbedtls_ssl_set_client_transport_id(&pSecureSocketContext->sslCtx,
                                                 pPeerAddr,
@@ -361,7 +361,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
         {
             CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
         }
-    }*/
+    }
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
 
@@ -373,10 +373,6 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
                         mbedtls_net_send,
                         mbedtls_net_recv,
                         mbedtls_net_recv_timeout);
-    if (pCtx->isServer)
-    {
-        *pSd = -1;
-    }
 
     return pSecureSocketContext;
 } // End: CW_TlsLib_MakeSocketSecure()

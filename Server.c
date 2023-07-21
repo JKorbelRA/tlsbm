@@ -236,12 +236,12 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         }
 
         CW_Common_AllocLogMarkerEnd("Context");
-        int oldSd = sd;
+        //int oldSd = sd;
         void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&sd,
                                                                 pSecurityCtx,
                                                                 pPeerAddr,
                                                                 peerAddrSize);
-        if (oldSd != sd)
+        /*if (oldSd != sd)
         {
             int sd = CW_Platform_Socket(false);
             if (sd == -1) //INVALID_SOCKET undef on Unix
@@ -250,7 +250,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
             }
 
             CW_Platform_Bind(sd, ip4Addr, port);
-        }
+        }*/
 
         int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
         if (res != 0)
