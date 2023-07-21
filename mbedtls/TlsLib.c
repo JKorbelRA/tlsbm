@@ -480,16 +480,18 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 {
     MbedDtlsObject_t* pSsl = (MbedDtlsObject_t*)pSecureSocketCtx;
+    bool retry = true;
     int ret = 0;
-    while(ret == 0)
+
+    while(retry)
     {
+        retry = false;
         if (mbedtls_ssl_set_client_transport_id(&pSsl->sslCtx,
                                                 pSsl->pPeerAddr,
                                                 pSsl->peerAddrSize) != 0)
         {
             CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
         }
-
 
         do
         {
@@ -500,7 +502,7 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
         if (ret == MBEDTLS_ERR_SSL_HELLO_VERIFY_REQUIRED)
         {
             mbedtls_ssl_session_reset(&pSsl->sslCtx);
-            ret = 0;
+            retry = true;
             printf("hello verification requested\n");
         }
         else if (ret != 0)
