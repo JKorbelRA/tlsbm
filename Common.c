@@ -159,6 +159,29 @@ void* CW_Common_Malloc(unsigned long size)
     return pPtr;
 }
 
+void* CW_Common_Calloc(size_t nitems, size_t itemBytes)
+{
+    size_t size = nitems * itemBytes;
+    char buf[64];
+
+    void* pPtr = calloc(nitems, itemBytes);
+    size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,0x%p,0x0,%zu\n", pPtr, size);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write heap usage record line 4 calloc");
+    }
+
+    if (size > 512)
+    {
+        printf("Allocating %zuB\n", size);
+    }
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
+
+    return pPtr;
+}
+
 void* CW_Common_Realloc(void* ptr, unsigned long size)
 {
     char buf[64];
