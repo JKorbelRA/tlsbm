@@ -259,7 +259,7 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     }
 
     pCtx->isServer = isServer;
-    pCtx->isServer = isTls;
+    pCtx->isTls = isTls;
 
     return pCtx;
 } // End: CW_TlsLib_CreateSecurityContext()
