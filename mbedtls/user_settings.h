@@ -1333,7 +1333,8 @@
  *
  * Uncomment to enable the smaller implementation of SHA256.
  */
-//#define MBEDTLS_SHA256_SMALLER
+// JKB
+#define MBEDTLS_SHA256_SMALLER
 
 /**
  * \def MBEDTLS_SHA512_SMALLER
@@ -1343,7 +1344,8 @@
  *
  * Uncomment to enable the smaller implementation of SHA512.
  */
-//#define MBEDTLS_SHA512_SMALLER
+// JKB
+#define MBEDTLS_SHA512_SMALLER
 
 /**
  * \def MBEDTLS_SSL_ALL_ALERT_MESSAGES
@@ -1841,7 +1843,8 @@
  *
  * Requires: MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
  */
-//#define MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
+// JKB
+#define MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
 
 /**
  * \def MBEDTLS_TEST_CONSTANT_FLOW_MEMSAN
@@ -3809,7 +3812,7 @@
  * while buffering multiple smaller handshake messages.
  *
  */
-//#define MBEDTLS_SSL_DTLS_MAX_BUFFERING             32768
+#define MBEDTLS_SSL_DTLS_MAX_BUFFERING             8192
 
 //#define MBEDTLS_PSK_MAX_LEN               32 /**< Max size of TLS pre-shared keys, in bytes (default 256 or 384 bits) */
 //#define MBEDTLS_SSL_COOKIE_TIMEOUT        60 /**< Default expiration delay of DTLS cookies, in seconds if HAVE_TIME, or in number of cookies issued */
