@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include <malloc.h>
 
 
 #include <crazywolf/Common.h>
@@ -164,11 +163,11 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
     if (isTls)
     {
-        pCtx = (MbedDtlsContext_t*)malloc(sizeof(MbedTlsContext_t));
+        pCtx = (MbedDtlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
     }
     else
     {
-        pCtx = (MbedDtlsContext_t*)malloc(sizeof(MbedDtlsContext_t));
+        pCtx = (MbedDtlsContext_t*)CW_Common_Malloc(sizeof(MbedDtlsContext_t));
     }
 
     if (pCtx == 0)
@@ -304,7 +303,7 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 {
     MbedDtlsContext_t* pCtx = (MbedDtlsContext_t*)pSecureCtx;
 
-    MbedTlsObject_t* pSecureSocketContext = malloc(sizeof(MbedTlsObject_t));
+    MbedTlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedTlsObject_t));
 
     mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
@@ -343,7 +342,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 {
     MbedDtlsContext_t* pCtx = (MbedDtlsContext_t*)pSecureCtx;
 
-    MbedDtlsObject_t* pSecureSocketContext = malloc(sizeof(MbedDtlsObject_t));
+    MbedDtlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedDtlsObject_t));
 
     mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
@@ -406,7 +405,7 @@ void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
     mbedtls_net_free(&pSsl->netCtx);
     mbedtls_ssl_free(&pSsl->sslCtx);
 
-    free(pSsl);
+    CW_Common_Free(pSsl);
 
 } // End: CW_TlsLib_UnmakeSocketSecure()
 
@@ -425,7 +424,7 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
     mbedtls_x509_crt_free(&pCtx->devCert);
     mbedtls_pk_free(&pCtx->devKey);
 
-    free(pCtx);
+    CW_Common_Free(pCtx);
 } // End: CW_TlsLib_DestroySecureContext()
 
 
