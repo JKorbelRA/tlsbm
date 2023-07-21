@@ -136,6 +136,15 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
 }
 
 
+int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
+{
+    int res = connect(sd,
+                      (struct sockaddr*)pPeerAddr,
+                      peerAddrSize) == -1;
+    return res;
+}
+
+
 void CW_Platform_Sleep(uint32_t s)
 {
     Sleep(s*1000);

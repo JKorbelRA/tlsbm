@@ -34,6 +34,7 @@ void CW_Platform_Shutdown(void);
 
 int CW_Platform_Socket(bool isStream);
 int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port);
+int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize);
 void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port);
 void CW_Platform_Listen(int sd);
 int CW_Platform_Accept(int listenSd);

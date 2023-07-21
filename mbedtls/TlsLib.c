@@ -55,6 +55,7 @@ typedef struct
     mbedtls_x509_crt devCert;
     mbedtls_pk_context devKey;
     mbedtls_timing_delay_context timer;
+    bool isServer;
 } MbedTlsContext_t;
 
 typedef struct
@@ -65,6 +66,7 @@ typedef struct
     mbedtls_x509_crt devCert;
     mbedtls_pk_context devKey;
     mbedtls_timing_delay_context timer;
+    bool isServer;
 
     // DTLS
     mbedtls_ssl_cookie_ctx cookies;
@@ -268,6 +270,8 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                       &pCtx->cookies);
     }
 
+    pCtx->isServer = isServer;
+
     return pCtx;
 } // End: CW_TlsLib_CreateSecurityContext()
 
@@ -305,8 +309,6 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
                              &pCtx->timer,
                              mbedtls_timing_set_delay,
                              mbedtls_timing_get_delay);
-
-
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
     pSecureSocketContext->netCtx.fd = sd;
@@ -347,14 +349,20 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int sd,
                              mbedtls_timing_set_delay,
                              mbedtls_timing_get_delay);
 
-    if (mbedtls_ssl_set_client_transport_id(&pSecureSocketContext->sslCtx,
-                                            pPeerAddr,
-                                            peerAddrSize) != 0)
+    if (pCtx->isServer)
     {
-        CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
+        if (mbedtls_ssl_set_client_transport_id(&pSecureSocketContext->sslCtx,
+                                                pPeerAddr,
+                                                peerAddrSize) != 0)
+        {
+            CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
+        }
     }
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
+
+    CW_Platform_ConnectPa(sd, pPeerAddr, peerAddrSize);
+
     pSecureSocketContext->netCtx.fd = sd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,
                         &pSecureSocketContext->netCtx,
