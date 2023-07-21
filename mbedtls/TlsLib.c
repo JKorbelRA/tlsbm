@@ -77,12 +77,16 @@ typedef struct
 {
     mbedtls_ssl_context sslCtx;
     mbedtls_net_context netCtx;
+    void* pPeerAddr;
+    size_t peerAddrSize;
 } MbedTlsObject_t;
 
 typedef struct
 {
     mbedtls_ssl_context sslCtx;
     mbedtls_net_context netCtx;
+    void* pPeerAddr;
+    size_t peerAddrSize;
 } MbedDtlsObject_t;
 
 
@@ -355,12 +359,8 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 
     if (pCtx->isServer)
     {
-        if (mbedtls_ssl_set_client_transport_id(&pSecureSocketContext->sslCtx,
-                                                pPeerAddr,
-                                                peerAddrSize) != 0)
-        {
-            CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
-        }
+        pSecureSocketContext->pPeerAddr = pPeerAddr;
+        pSecureSocketContext->peerAddrSize = peerAddrSize;
     }
 
     mbedtls_net_init(&pSecureSocketContext->netCtx);
@@ -483,6 +483,13 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
     int ret = 0;
     while(ret == 0)
     {
+        if (mbedtls_ssl_set_client_transport_id(&pSsl->sslCtx,
+                                                pSsl->pPeerAddr,
+                                                pSsl->peerAddrSize) != 0)
+        {
+            CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
+        }
+
 
         do
         {
