@@ -3812,6 +3812,7 @@
  * while buffering multiple smaller handshake messages.
  *
  */
+// JKB
 #define MBEDTLS_SSL_DTLS_MAX_BUFFERING             8192
 
 //#define MBEDTLS_PSK_MAX_LEN               32 /**< Max size of TLS pre-shared keys, in bytes (default 256 or 384 bits) */
