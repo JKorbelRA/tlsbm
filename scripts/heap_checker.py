@@ -6,12 +6,15 @@ import argparse
 
 
 class HeapStatisticsTest:
-    def __init__(self, name):
+    def __init__(self, name, is_mbedtls):
         self.state = "parsing_context"
         self.total_alloc = 0
         self.total_free = 0
         self.used = 0
         self.peak = 0
+
+        self.is_mbedtls = is_mbedtls
+        self.mbedtls_reserved_bytes = 32768
 
         self.consumed_stack = 0
         self.remaining_after_handshake = 0
@@ -143,7 +146,12 @@ class HeapStatisticsTest:
         print(f"Context Remaining: {self.context_used}")
         if self.context_alloc != self.context_free:
             print("The TLS library is leaking context!")
-        print(f"Remaining allocated after handshake: {self.remaining_after_handshake}")
+        if self.is_mbedtls:
+            print(
+                f"Remaining allocated after handshake: {self.remaining_after_handshake-self.mbedtls_reserved_bytes}")
+        else:
+            print(
+                f"Remaining allocated after handshake: {self.remaining_after_handshake}")
 
 
 class HeapStatistics:
@@ -166,17 +174,18 @@ class HeapStatistics:
                 i += 1
         self.point_cnt = i-1 if i > 0 else 0
 
-    def __init__(self, heap_file: Path):
+    def __init__(self, heap_file: Path, is_mbedtls):
         self.point_cnt = 0
         self.tests = []
         self.cur_test = None
+        self.is_mbedtls = is_mbedtls
         self.alloc_points = []
         self.file_to_points(heap_file)
 
     def process_begin_marker(self, a_point):
         name = a_point["name"]
         if name.startswith("Test:"):
-            hst = HeapStatisticsTest(name)
+            hst = HeapStatisticsTest(name, self.is_mbedtls)
             self.tests.append(hst)
             self.cur_test = hst
         if name == "Context":
@@ -241,7 +250,8 @@ if __name__ == '__main__':
 
     heap_file = Path(args.heap_file)
 
-    hs = HeapStatistics(heap_file)
+    hs = HeapStatistics(heap_file,
+                        "mbedtls" in args.heap_file)
     hs.parse_alloc_points()
     hs.print_statistics()
     hs.draw()
