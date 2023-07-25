@@ -6,7 +6,7 @@
 #undef NO_PSK
 
 #undef ALT_ECC_SIZE
-#define SMALL_SESSION_CACHE
+//#define SMALL_SESSION_CACHE
 #define USE_SLOW_SHA2
 #define USE_SLOW_SHA
 #define GCM_SMALL
@@ -14,8 +14,6 @@
 #define RSA_LOW_MEM
 // #define CURVE25519_SMALL
 #define WOLFSSL_SMALL_CERT_VERIFY
-// // #define HAVE_CHACHA
-// // #define HAVE_POLY1305
 // #define WOLFSSL_SP_X86_64_ASM
 // #define NO_OLD_POLY1305
 #define NO_SESSION_CACHE
@@ -32,7 +30,7 @@
 // #define WOLFSSL_HAVE_SP_ECC
 // #define WOLFSSL_HAVE_SP_DH
 // #define WC_ECC_NONBLOCK
-#define FP_ECC
+//#define FP_ECC
 // #undef FAST_MATH
 #define WC_ASN_NAME_MAX 128
 #define WC_CTC_MAX_ALT_SIZE 128
