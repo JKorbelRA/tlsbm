@@ -594,3 +594,8 @@ void XFREE(void *p, void* heap, int type)
     (void)type;
     return CW_Common_Free(p);
 }
+
+const char* CW_TlsLib_GetName(void)
+{
+    return "wolfssl";
+}

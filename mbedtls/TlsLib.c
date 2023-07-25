@@ -559,3 +559,8 @@ void CW_TlsLib_Shutdown(void)
     mbedtls_ctr_drbg_free(&cw_TlsLib_ctrDrbg);
     mbedtls_entropy_free(&cw_TlsLib_entropy);
 } // End: CW_TlsLib_Shutdown()
+
+const char* CW_TlsLib_GetName(void)
+{
+    return "mbedtls";
+}

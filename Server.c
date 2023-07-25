@@ -327,9 +327,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 //------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-
     CW_Platform_Startup();
-    CW_Common_Startup();
+    CW_Common_Startup("client", CW_TlsLib_GetName());
     CW_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;

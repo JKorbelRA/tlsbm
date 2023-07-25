@@ -140,7 +140,7 @@ int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
 {
     int res = connect(sd,
                       (struct sockaddr*)pPeerAddr,
-                      peerAddrSize) == -1;
+                      (int)peerAddrSize) == -1;
     return res;
 }
 

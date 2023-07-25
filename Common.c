@@ -88,9 +88,20 @@ static SuiteCfg_t cw_Common_suiteCfgs[] = {
 // Function definitions
 //-----------------------------------------------------------------------------
 
-void CW_Common_Startup(void)
+void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
 {
-    cw_Common_heapCsv = fopen("heap.csv", "w");
+    char filename[64];
+    size_t wouldBeWritten = snprintf(filename,
+                                     sizeof(filename),
+                                     "%s_%s.csv",
+                                     pMethodName,
+                                     pTlsLibName);
+    if (wouldBeWritten > sizeof(filename))
+    {
+        CW_Common_Die("cannot write heap usage record line 4 malloc");
+    }
+
+    cw_Common_heapCsv = fopen(filename, "w");
     if (cw_Common_heapCsv == NULL)
     {
         CW_Common_Die("unable to open heap.csv file for writing");
@@ -121,7 +132,21 @@ void CW_Common_Allocaprint(uint8_t* pAlloca,
         ; // just count
     }
 
-    printf("Stack consumed %zu\n", stackMaxBytes-freeStack);
+    char buf[64];
+    size_t wouldBeWritten = snprintf(buf,
+                                     sizeof(buf),
+                                     "S,0x%p,%zu,%zu\n",
+                                     pAlloca,
+                                     stackMaxBytes,
+                                     stackMaxBytes-freeStack);
+    if (wouldBeWritten > sizeof(buf))
+    {
+        CW_Common_Die("cannot write stack usage record line");
+    }
+
+
+    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
+    fflush(cw_Common_heapCsv);
 } // End: CW_Common_Allocaprint()
 
 //-----------------------------------------------------------------------------

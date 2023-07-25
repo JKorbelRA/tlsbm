@@ -220,4 +220,7 @@ int CW_TlsLib_Recv(int sd,
                    uint8_t* pData,
                    size_t dataBytes);
 
+
+const char* CW_TlsLib_GetName(void);
+
 #endif // !defined(CW_TLSLIB_H)
