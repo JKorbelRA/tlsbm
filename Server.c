@@ -151,7 +151,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
                                      pSecureSocketCtx,
                                      (uint8_t*)&cw_Server_inMsg.str.payload,
                                      payloadBytes);
-                if (res == payloadBytes)
+                if ((size_t)res == payloadBytes)
                 {
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
