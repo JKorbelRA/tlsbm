@@ -148,7 +148,7 @@ class HeapStatisticsTest:
             print("The TLS library is leaking context!")
         if self.is_mbedtls:
             print(
-                f"Remaining allocated after handshake: {self.remaining_after_handshake-self.mbedtls_reserved_bytes}")
+                f"Remaining allocated after handshake: {self.remaining_after_handshake-self.mbedtls_reserved_bytes} ({self.remaining_after_handshake})")
         else:
             print(
                 f"Remaining allocated after handshake: {self.remaining_after_handshake}")
@@ -254,4 +254,4 @@ if __name__ == '__main__':
                         "mbedtls" in args.heap_file)
     hs.parse_alloc_points()
     hs.print_statistics()
-    hs.draw()
+    # hs.draw()
