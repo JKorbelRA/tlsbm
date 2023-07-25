@@ -10,7 +10,7 @@ set(C_STANDARD 99)
 
 set(WOLFSSL_SOURCE "C:/share/gitlab/wolfssl-5.6.3-stable" CACHE PATH "Path to wolfSSL sources")
 option(WOLFSSL_USER_IO "" OFF)
-option(WOLFSSL_DEBUG "" ON)
+option(WOLFSSL_DEBUG "" OFF)
 set(WOLFSSL_DTLS "yes" CACHE STRING "")
 set(BUILD_DTLS_COMMON "yes" CACHE STRING "")
 set(BUILD_SP "no" CACHE STRING "")
