@@ -497,7 +497,7 @@ int CW_TlsLib_Recv(int sd,
 
     if (offset == dataBytes)
     {
-        return 0;
+        return dataBytes;
     }
 
 #if defined(CW_ENV_DEBUG_ENABLE)
