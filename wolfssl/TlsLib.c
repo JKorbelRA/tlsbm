@@ -492,12 +492,11 @@ int CW_TlsLib_Recv(int sd,
         {
             offset += ret;
         }
-    } while (offset < dataBytes &&
-            (err == 0 || err == WC_PENDING_E));
+    } while (err == WC_PENDING_E);
 
-    if (offset == dataBytes)
+    if (offset >= 0)
     {
-        return dataBytes;
+        return offset;
     }
 
 #if defined(CW_ENV_DEBUG_ENABLE)
