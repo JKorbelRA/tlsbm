@@ -349,7 +349,7 @@ int main(int argc, char** argv)
     printf("Starting TLS client + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
     cw_Client_TlsClient(ip4Addr, port, true, true, false);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE")
+    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
     CW_Platform_Sleep(1);
 
     printf("Starting TLS client + CERT + ECC + GCM\n");
