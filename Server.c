@@ -84,15 +84,23 @@ Msg_t cw_Server_inMsg;
 static void cw_Server_TlsServer(uint32_t ip4Addr,
                                 uint16_t port,
                                 bool isRsa,
-                                bool isPsk)
+                                bool isPsk,
+                                bool isGcm)
 {
     CW_Common_AllocLogMarkerBegin("Context");
 
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
-    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
+
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
+                                                        isRsa,
+                                                        isGcm);
+    printf("Picking %s %s %s %s\n",
+           pCfg->pCipherSuite,
+           pCfg->pCaCert,
+           pCfg->pDevCert,
+           pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          pCfg->pCaCert,
@@ -198,16 +206,23 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 static void cw_Server_DtlsServer(uint32_t ip4Addr,
                                  uint16_t port,
                                  bool isRsa,
-                                 bool isPsk)
+                                 bool isPsk,
+                                 bool isGcm)
 {
 
     CW_Common_AllocLogMarkerBegin("Context");
     size_t stackMaxBytes = 50*1000;
     uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
 
-    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
+                                                        isRsa,
+                                                        isGcm);
+    printf("Picking %s %s %s %s\n",
+           pCfg->pCipherSuite,
+           pCfg->pCaCert,
+           pCfg->pDevCert,
+           pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
                                                          pCfg->pCaCert,
@@ -350,43 +365,53 @@ int main(int argc, char** argv)
 
     printf("Starting TLS server, no PSK, ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
-    cw_Server_TlsServer(ip4Addr, port, false, false);
+    cw_Server_TlsServer(ip4Addr, port, false, false, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC");
 
     printf("Starting TLS server + PSK + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + ECC");
-    cw_Server_TlsServer(ip4Addr, port, false, true);
+    cw_Server_TlsServer(ip4Addr, port, false, true, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + ECC");
 
     printf("Starting TLS server, no PSK, RSA\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + RSA");
-    cw_Server_TlsServer(ip4Addr, port, true, false);
+    cw_Server_TlsServer(ip4Addr, port, true, false, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + RSA");
 
     printf("Starting TLS server + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
-    cw_Server_TlsServer(ip4Addr, port, true, true);
+    cw_Server_TlsServer(ip4Addr, port, true, true, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
+
+    printf("Starting TLS server, no PSK, ECC + GCM\n");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC + GCM");
+    cw_Server_TlsServer(ip4Addr, port, false, false, true);
+    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC + GCM");
 
     printf("Starting DTLS server, no PSK, ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
-    cw_Server_DtlsServer(ip4Addr, port, false, false);
+    cw_Server_DtlsServer(ip4Addr, port, false, false, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC");
 
     printf("Starting DTLS server + PSK + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + ECC");
-    cw_Server_DtlsServer(ip4Addr, port, false, true);
+    cw_Server_DtlsServer(ip4Addr, port, false, true, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + ECC");
 
     printf("Starting DTLS server, no PSK, RSA\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + RSA");
-    cw_Server_DtlsServer(ip4Addr, port, true, false);
+    cw_Server_DtlsServer(ip4Addr, port, true, false, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + RSA");
 
     printf("Starting DTLS server + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + DHE");
-    cw_Server_DtlsServer(ip4Addr, port, true, true);
+    cw_Server_DtlsServer(ip4Addr, port, true, true, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + DHE");
+
+    printf("Starting DTLS server, no PSK, ECC + GCM\n");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC + GCM");
+    cw_Server_DtlsServer(ip4Addr, port, false, false, true);
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC + GCM");
 
 
     CW_TlsLib_Shutdown();

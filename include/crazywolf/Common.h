@@ -28,8 +28,10 @@
 
 #define CW_CIPHER_SUITE_RSA_PSK "DHE-PSK-AES128-CBC-SHA256"
 #define CW_CIPHER_SUITE_RSA_CERT "DHE-RSA-AES256-SHA256"
+
 #define CW_CIPHER_SUITE_ECC_PSK "ECDHE-PSK-AES128-CBC-SHA256"
-#define CW_CIPHER_SUITE_ECC_CERT "ECDHE-ECDSA-AES128-SHA256"
+#define CW_CIPHER_SUITE_ECC_CERT "ECDHE-ECDSA-AES128-CBC-SHA256"
+#define CW_CIPHER_SUITE_ECC_CERT_GCM "ECDHE-ECDSA-AES128-GCM-SHA256"
 
 typedef struct
 {
@@ -74,7 +76,7 @@ const char* CW_Common_GetPskIdentity(void);
 uint8_t* CW_Common_GetPsk(size_t* pPskBytes);
 void  CW_Common_AllocLogMarkerBegin(const char* pMarker);
 void  CW_Common_AllocLogMarkerEnd(const char* pMarker);
-SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa);
+SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa, bool isGcm);
 void CW_Common_SetIp4Port(uint32_t ip4Addr, uint16_t port);
 void CW_Common_GetIp4Port(uint32_t* pIp4Addr, uint16_t* pPort);
 void* CW_Common_Calloc(size_t nitems, size_t itemBytes);

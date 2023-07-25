@@ -87,12 +87,13 @@ static void cw_TlsLib_Debug(void* ctx, int level,
 mbedtls_entropy_context cw_TlsLib_entropy;
 mbedtls_ctr_drbg_context cw_TlsLib_ctrDrbg;
 
-int cw_TlsLib_csLists[4][2] =
+int cw_TlsLib_csLists[5][2] =
 {
  {MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, 0},
  {MBEDTLS_TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256, 0},
  {MBEDTLS_TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, 0},
  {MBEDTLS_TLS_DHE_PSK_WITH_AES_128_CBC_SHA256, 0},
+ {MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, 0},
 };
 
 //-----------------------------------------------------------------------------
@@ -204,6 +205,11 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_PSK) == 0)
     {
         csPick = &cw_TlsLib_csLists[1][0];
+
+    }
+    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_CERT_GCM) == 0)
+    {
+        csPick = &cw_TlsLib_csLists[4][0];
 
     }
     else if (strcmp(pCipherList, CW_CIPHER_SUITE_RSA_CERT) == 0)

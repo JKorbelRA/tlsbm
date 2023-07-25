@@ -141,7 +141,8 @@ static void cw_Client_SendToTestMsg(int sd,
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
                                 bool isRsa,
-                                bool isPsk)
+                                bool isPsk,
+                                bool isGcm)
 {
     CW_Common_AllocLogMarkerBegin("Context");
     size_t stackMaxBytes = 50*1000;
@@ -163,8 +164,14 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
     printf("Server %d:%d connected\n", ip4Addr, port);
 
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
-    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
+                                                        isRsa,
+                                                        isGcm);
+    printf("Picking %s %s %s %s\n",
+           pCfg->pCipherSuite,
+           pCfg->pCaCert,
+           pCfg->pDevCert,
+           pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          pCfg->pCaCert,
@@ -216,7 +223,8 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
                                  bool isRsa,
-                                 bool isPsk)
+                                 bool isPsk,
+                                 bool isGcm)
 {
     CW_Common_AllocLogMarkerBegin("Context");
 
@@ -230,8 +238,14 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
         CW_Common_Die("can't get sd");
     }
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk, isRsa);
-    printf("Picking %s %s %s %s\n", pCfg->pCipherSuite, pCfg->pCaCert, pCfg->pDevCert, pCfg->pDevKey);
+    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
+                                                        isRsa,
+                                                        isGcm);
+    printf("Picking %s %s %s %s\n",
+           pCfg->pCipherSuite,
+           pCfg->pCaCert,
+           pCfg->pDevCert,
+           pCfg->pDevKey);
 
     void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
                                                          pCfg->pCaCert,
@@ -314,58 +328,72 @@ int main(int argc, char** argv)
 
     printf("Starting TLS client + CERT + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
-    cw_Client_TlsClient(ip4Addr, port, false, false);
+    cw_Client_TlsClient(ip4Addr, port, false, false, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client + PSK + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + ECC");
-    cw_Client_TlsClient(ip4Addr, port, false, true);
+    cw_Client_TlsClient(ip4Addr, port, false, true, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client + CERT + RSA\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + RSA");
-    cw_Client_TlsClient(ip4Addr, port, true, false);
+    cw_Client_TlsClient(ip4Addr, port, true, false, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + RSA");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting TLS client + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
-    cw_Client_TlsClient(ip4Addr, port, true, true);
+    cw_Client_TlsClient(ip4Addr, port, true, true, false);
     CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
+    printf("Sleep 5s before next test...\n");
+    CW_Platform_Sleep(5);
+
+    printf("Starting TLS client + CERT + ECC + GCM\n");
+    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC + GCM");
+    cw_Client_TlsClient(ip4Addr, port, false, false, true);
+    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC + GCM");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client + CERT + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
-    cw_Client_DtlsClient(ip4Addr, port, false, false);
+    cw_Client_DtlsClient(ip4Addr, port, false, false, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client + PSK + ECC\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + ECC");
-    cw_Client_DtlsClient(ip4Addr, port, false, true);
+    cw_Client_DtlsClient(ip4Addr, port, false, true, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + ECC");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client + CERT + RSA\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + RSA");
-    cw_Client_DtlsClient(ip4Addr, port, true, false);
+    cw_Client_DtlsClient(ip4Addr, port, true, false, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + RSA");
     printf("Sleep 5s before next test...\n");
     CW_Platform_Sleep(5);
 
     printf("Starting DTLS client + PSK + DHE\n");
     CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + DHE");
-    cw_Client_DtlsClient(ip4Addr, port, true, true);
+    cw_Client_DtlsClient(ip4Addr, port, true, true, false);
     CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + DHE");
     printf("FINISHED\n");
+
+    printf("Starting DTLS client + CERT + ECC + GCM\n");
+    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC + GCM");
+    cw_Client_DtlsClient(ip4Addr, port, false, false, true);
+    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC + GCM");
+    printf("Sleep 5s before next test...\n");
+    CW_Platform_Sleep(5);
 
 
 

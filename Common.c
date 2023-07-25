@@ -78,10 +78,14 @@ static SuiteCfg_t cw_Common_suiteCfgs[] = {
                                             CW_CACERT_RSA_PATH,
                                             CW_DEVCERT_RSA_PATH,
                                             CW_DEVKEY_RSA_PATH},
-                                           {CW_CIPHER_SUITE_RSA_PSK,
-                                            CW_CACERT_RSA_PATH,
-                                            CW_DEVCERT_RSA_PATH,
-                                            CW_DEVKEY_RSA_PATH}
+                                            {CW_CIPHER_SUITE_RSA_PSK,
+                                             CW_CACERT_RSA_PATH,
+                                             CW_DEVCERT_RSA_PATH,
+                                             CW_DEVKEY_RSA_PATH},
+                                             {CW_CIPHER_SUITE_ECC_CERT_GCM,
+                                              CW_CACERT_ECC_PATH,
+                                              CW_DEVCERT_ECC_PATH,
+                                              CW_DEVKEY_ECC_PATH}
 };
 
 //-----------------------------------------------------------------------------
@@ -293,9 +297,14 @@ void CW_Common_Shutdown(void)
 }
 
 
-SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa)
+SuiteCfg_t* CW_Common_GetCipherSuiteAndFiles(bool isPsk, bool isRsa, bool isGcm)
 {
     int id = ((isRsa == true) << 1) | (isPsk == true);
+
+    if (isGcm)
+    {
+        id = 4;
+    }
 
     return &cw_Common_suiteCfgs[id];
 }

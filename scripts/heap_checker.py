@@ -13,10 +13,16 @@ class HeapStatisticsTest:
         self.used = 0
         self.peak = 0
 
+        self.consumed_stack = 0
+        self.remaining_after_handshake = 0
+
         self.context_alloc = 0
         self.context_free = 0
         self.context_used = 0
-        self.context_peak = 0
+
+        self.security_context_active = False
+        self.handshake_active = False
+        self.message_active = False
 
         self.cur_alloc_blocks = {}
         self.name = name
@@ -89,6 +95,22 @@ class HeapStatisticsTest:
     def process_end_context(self):
         self.security_context_active = False
 
+    def process_begin_handshake(self):
+        self.handshake_active = True
+
+    def process_end_handshake(self):
+        self.handshake_active = False
+
+    def process_begin_message(self):
+        self.remaining_after_handshake = self.used
+        self.message_active = True
+
+    def process_end_message(self):
+        self.message_active = False
+
+    def process_stackcheck(self, a_point):
+        self.consumed_stack = a_point["size_bytes"]
+
     def on_processed_point(self, i):
         used = self.used - self.context_used
         if used > self.peak:
@@ -113,14 +135,15 @@ class HeapStatisticsTest:
         print(f"Handshake total alloc: {self.total_alloc}")
         print(f"Handshake total free: {self.total_free}")
         print(f"Handshake Remaining: {self.used}")
+        print(f"Handshake Stack consumption: {self.consumed_stack}")
         if self.total_alloc != self.total_free:
             print("The TLS library is leaking handshake!")
-        print(f"Context Peak: {self.context_peak}")
         print(f"Context total alloc: {self.context_alloc}")
         print(f"Context total free: {self.context_free}")
         print(f"Context Remaining: {self.context_used}")
         if self.context_alloc != self.context_free:
             print("The TLS library is leaking context!")
+        print(f"Remaining allocated after handshake: {self.remaining_after_handshake}")
 
 
 class HeapStatistics:
@@ -158,6 +181,10 @@ class HeapStatistics:
             self.cur_test = hst
         if name == "Context":
             self.cur_test.process_begin_context()
+        if name == "Handshake":
+            self.cur_test.process_begin_handshake()
+        if name == "Message":
+            self.cur_test.process_begin_message()
 
     def process_end_marker(self, a_point):
         name = a_point["name"]
@@ -165,6 +192,10 @@ class HeapStatistics:
             self.cur_test = None
         if name == "Context":
             self.cur_test.process_end_context()
+        if name == "Handshake":
+            self.cur_test.process_end_handshake()
+        if name == "Message":
+            self.cur_test.process_end_message()
 
     def parse_alloc_points(self):
         i = 0
@@ -181,6 +212,8 @@ class HeapStatistics:
                 self.process_begin_marker(a_point)
             elif op == "E":
                 self.process_end_marker(a_point)
+            elif op == "S":
+                self.cur_test.process_stackcheck(a_point)
             else:
                 assert False, f"unknown op {op}"
 
