@@ -66,12 +66,14 @@
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
                                 bool isRsa,
-                                bool isPsk);
+                                bool isPsk,
+                                bool isGcm);
 
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
                                  bool isRsa,
-                                 bool isPsk);
+                                 bool isPsk,
+                                 bool isGcm);
 
 //-----------------------------------------------------------------------------
 // Variable definitions

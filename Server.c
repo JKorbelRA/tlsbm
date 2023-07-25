@@ -54,11 +54,13 @@
 static void cw_Server_TlsServer(uint32_t ip4Addr,
                                 uint16_t port,
                                 bool isPsk,
-                                bool isRsa);
+                                bool isRsa,
+                                bool isGcm);
 static void cw_Server_DtlsServer(uint32_t ip4Addr,
                                  uint16_t port,
                                  bool isPsk,
-                                 bool isRsa);
+                                 bool isRsa,
+                                 bool isGcm);
 
 //------------------------------------------------------------------------------
 // Variable definitions
