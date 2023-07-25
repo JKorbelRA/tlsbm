@@ -104,7 +104,7 @@ void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
     cw_Common_heapCsv = fopen(filename, "w");
     if (cw_Common_heapCsv == NULL)
     {
-        CW_Common_Die("unable to open heap.csv file for writing");
+        CW_Common_Die("unable to open .csv file for writing");
     }
 
 
