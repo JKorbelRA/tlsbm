@@ -53,10 +53,9 @@ typedef union
     uint8_t msg[UINT16_MAX + sizeof(uint16_t) + sizeof(uint8_t)];
 } Msg_t;
 
-uint8_t* CW_Common_Allocacheck(size_t stackMaxBytes);
+void CW_Common_Allocacheck(size_t stackMaxBytes);
 
-void CW_Common_Allocaprint(uint8_t* pAlloca,
-                           size_t stackMaxBytes);
+void CW_Common_Allocaprint(size_t stackMaxBytes);
 
 //-----------------------------------------------------------------------------
 ///

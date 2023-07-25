@@ -118,16 +118,22 @@ void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
 }
 
 
-uint8_t* CW_Common_Allocacheck(size_t stackMaxBytes)
+void CW_Common_Allocacheck(size_t stackMaxBytes)
 {
     uint8_t* pAlloca = alloca(stackMaxBytes);
     memset(pAlloca, 0xccU, stackMaxBytes);
-    return pAlloca;
 } // End: CW_Common_Allocacheck()
 
-void CW_Common_Allocaprint(uint8_t* pAlloca,
-                           size_t stackMaxBytes)
+void CW_Common_Allocaprint(size_t stackMaxBytes)
 {
+    uint8_t* pAlloca = alloca(stackMaxBytes);
+
+    unsigned int i = 0;
+    for (;pAlloca[i] != 0xcc;i++){}
+
+    printf("running %u positions\n", i);
+    pAlloca = &pAlloca[i];
+
     size_t freeStack = 0;
     for (;
          freeStack < stackMaxBytes && pAlloca[freeStack] == 0xcc;
@@ -147,6 +153,8 @@ void CW_Common_Allocaprint(uint8_t* pAlloca,
     {
         CW_Common_Die("cannot write stack usage record line");
     }
+
+    printf("%zu\n", stackMaxBytes-freeStack);
 
 
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);

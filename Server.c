@@ -92,7 +92,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     CW_Common_AllocLogMarkerBegin("Context");
 
     size_t stackMaxBytes = 50*1000;
-    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
+    CW_Common_Allocacheck(stackMaxBytes);
 
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
@@ -183,8 +183,6 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 
         CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
         CW_Platform_CloseSocket(sd);
-
-        CW_Common_Allocaprint(pAlloca, stackMaxBytes);
         CW_Platform_FlushStdout();
 
         break;
@@ -192,6 +190,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(listenSd);
+    CW_Common_Allocaprint(stackMaxBytes);
 } // End: cw_Server_TlsServer()
 
 
@@ -214,7 +213,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
     CW_Common_AllocLogMarkerBegin("Context");
     size_t stackMaxBytes = 50*1000;
-    uint8_t* pAlloca = CW_Common_Allocacheck(stackMaxBytes);
+    CW_Common_Allocacheck(stackMaxBytes);
 
 
     SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
@@ -320,8 +319,6 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 
         CW_TlsLib_UnmakeSocketSecure(clientSd, pSecureSocketCtx);
         CW_Platform_CloseSocket(clientSd);
-
-        CW_Common_Allocaprint(pAlloca, stackMaxBytes);
         CW_Platform_FlushStdout();
 
         break;
@@ -330,6 +327,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     CW_Platform_DeletePeerAddr4(pPeerAddr);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
     CW_Platform_CloseSocket(listenSd);
+    CW_Common_Allocaprint(stackMaxBytes);
 } // End: cw_Server_DtlsServer()
 
 
