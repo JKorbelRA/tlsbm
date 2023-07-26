@@ -379,13 +379,24 @@ int main(int argc, char** argv)
 
 
     CW_Common_SetIp4Port(ip4Addr, port);
+    char testName[128];
 
     for (int id = 0; ;id++)
     {
         SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
         if (pSc != NULL)
         {
+            size_t wouldBeWritten = snprintf(testName, sizeof(testName),
+                                             "Test: TLS %s",
+                                             pSc->pCipherSuite);
+            if (wouldBeWritten > sizeof(testName))
+            {
+                CW_Common_Die("cannot write test marker");
+            }
+
+            CW_Common_AllocLogMarkerBegin(testName);
             cw_Server_TlsServer(ip4Addr, port, pSc);
+            CW_Common_AllocLogMarkerEnd(testName);
             CW_Platform_Sleep(1);
         }
         else
@@ -399,7 +410,17 @@ int main(int argc, char** argv)
         SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
         if (pSc != NULL)
         {
+            size_t wouldBeWritten = snprintf(testName, sizeof(testName),
+                                             "Test: DTLS %s",
+                                             pSc->pCipherSuite);
+            if (wouldBeWritten > sizeof(testName))
+            {
+                CW_Common_Die("cannot write test marker");
+            }
+
+            CW_Common_AllocLogMarkerBegin(testName);
             cw_Server_DtlsServer(ip4Addr, port, pSc);
+            CW_Common_AllocLogMarkerEnd(testName);
             CW_Platform_Sleep(1);
         }
         else
