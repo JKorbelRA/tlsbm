@@ -15,6 +15,8 @@ add_definitions(-DMBEDTLS_DEBUG_C)
 endif()
 
 add_definitions(-DMBEDTLS_CONFIG_FILE="mbed_settings.h")
+#add_definitions(-DMBEDTLS_CHACHA20_C)
+#add_definitions(-DMBEDTLS_CHACHAPOLY_C)
 
 option(ENABLE_PROGRAMS "" OFF)
 option(ENABLE_TESTING "" OFF)
