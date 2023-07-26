@@ -92,11 +92,9 @@ static void cw_Client_SendTestMsg(int sd,
     cw_Client_msg.str.zero = 0;
     memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
-#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Testing following message (%u bytes):\n%s\n",
            (unsigned int)dataBytes,
            pData);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     CW_TlsLib_SendAll(sd,
                       pSecureSocketCtx,
