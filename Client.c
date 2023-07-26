@@ -147,8 +147,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 bool isGcm)
 {
     CW_Common_AllocLogMarkerBegin("Context");
-    size_t stackMaxBytes = 50*1000;
-    CW_Common_Allocacheck(stackMaxBytes);
+    uint8_t* pAllocaHint = CW_Common_Allocacheck();
     printf("Connecting server\n");
 
     int sd = CW_Platform_Socket(true);
@@ -207,7 +206,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
 
 
-    CW_Common_Allocaprint(stackMaxBytes);
+    CW_Common_Allocaprint(pAllocaHint);
     CW_Platform_FlushStdout();
 } // End: cw_Client_TlsClient()
 
@@ -230,8 +229,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
 {
     CW_Common_AllocLogMarkerBegin("Context");
 
-    size_t stackMaxBytes = 50*1000;
-    CW_Common_Allocacheck(stackMaxBytes);
+    uint8_t* pAllocaHint = CW_Common_Allocacheck();
 
     int sd = CW_Platform_Socket(false);
 
@@ -287,11 +285,10 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
     CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
     CW_Platform_CloseSocket(sd);
     CW_TlsLib_DestroySecureContext(pSecurityCtx);
-
     CW_Platform_DeletePeerAddr4(pPeerAddr);
 
 
-    CW_Common_Allocaprint(stackMaxBytes);
+    CW_Common_Allocaprint(pAllocaHint);
     CW_Platform_FlushStdout();
 } // End: cw_Client_DtlsClient()
 

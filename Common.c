@@ -29,7 +29,6 @@
 // Macros
 //-----------------------------------------------------------------------------
 
-#define STACK_FILL_CANARY 0xccU
 
 //-----------------------------------------------------------------------------
 // Local data types
@@ -51,6 +50,7 @@
 // Variable definitions
 //-----------------------------------------------------------------------------
 
+static uint8_t cw_Common_canaries[] = {0xca, 0xfe, 0xba, 0xbe};
 
 static FILE* cw_Common_heapCsv;
 
@@ -121,36 +121,62 @@ void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
 }
 
 
-void CW_Common_Allocacheck(size_t stackMaxBytes)
+void* CW_Common_Allocacheck(void)
 {
-    uint8_t* pAlloca = alloca(stackMaxBytes);
-    memset(pAlloca, STACK_FILL_CANARY, stackMaxBytes);
+    uint8_t* pAlloca = alloca(ALLOCACHECK_STACK_BYTES);
 
     size_t i = 0;
-    while (pAlloca[i] == STACK_FILL_CANARY)
+    for (; i < ALLOCACHECK_STACK_BYTES; i++)
     {
+        pAlloca[i] = cw_Common_canaries[i%4];
+    }
+
+    printf("Filling in %zu bytes of stack with 0x%02x 0x%02x 0x%02x 0x%02x\n",
+           i,
+           cw_Common_canaries[0],
+           cw_Common_canaries[1],
+           cw_Common_canaries[2],
+           cw_Common_canaries[3]);
+
+    return pAlloca;
+} // End: CW_Common_Allocacheck()
+
+void CW_Common_Allocaprint(void* pAllocaHint)
+{
+#ifdef _WIN32
+    uint8_t* pAlloca = pAllocaHint;
+#else
+    uint8_t* pAlloca = alloca(ALLOCACHECK_STACK_BYTES);
+#endif
+
+
+    size_t i = 0;
+    while (i < ALLOCACHECK_STACK_BYTES - 4)
+    {
+        if (pAlloca[i] == cw_Common_canaries[0]
+            && pAlloca[i + 1] == cw_Common_canaries[1]
+            && pAlloca[i + 2] == cw_Common_canaries[2]
+            && pAlloca[i + 3] == cw_Common_canaries[3])
+        {
+            break;
+        }
+
         i++;
     }
 
-    printf("Filling in %zu bytes of stack with 0x%02x\n", i, STACK_FILL_CANARY);
-} // End: CW_Common_Allocacheck()
-
-void CW_Common_Allocaprint(size_t stackMaxBytes)
-{
-    uint8_t* pAlloca = alloca(stackMaxBytes);
-
-    unsigned int i = 0;
-    for (;pAlloca[i] != STACK_FILL_CANARY;i++){}
-
-    printf("running %u positions\n", i);
+    printf("running %zu positions\n", i);
     pAlloca = &pAlloca[i];
 
     size_t freeStack = 0;
-    for (;
-         freeStack < stackMaxBytes && pAlloca[freeStack] == 0xcc;
-         freeStack++)
+    bool ok = true;
+    while(true)
     {
-        ; // just count
+        if (pAlloca[freeStack] != cw_Common_canaries[freeStack%4])
+        {
+            break;
+        }
+
+        freeStack++;
     }
 
     char buf[64];
@@ -158,14 +184,14 @@ void CW_Common_Allocaprint(size_t stackMaxBytes)
                                      sizeof(buf),
                                      "S,0x%p,%zu,%zu\n",
                                      pAlloca,
-                                     stackMaxBytes,
-                                     stackMaxBytes-freeStack);
+                                     (size_t)ALLOCACHECK_STACK_BYTES,
+                                     (size_t)ALLOCACHECK_STACK_BYTES-freeStack);
     if (wouldBeWritten > sizeof(buf))
     {
         CW_Common_Die("cannot write stack usage record line");
     }
 
-    printf("%zu\n", stackMaxBytes-freeStack);
+    printf("%zu\n", ALLOCACHECK_STACK_BYTES-freeStack);
 
 
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);

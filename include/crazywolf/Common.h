@@ -53,9 +53,11 @@ typedef union
     uint8_t msg[UINT16_MAX + sizeof(uint16_t) + sizeof(uint8_t)];
 } Msg_t;
 
-void CW_Common_Allocacheck(size_t stackMaxBytes);
+#define ALLOCACHECK_STACK_BYTES 50000
 
-void CW_Common_Allocaprint(size_t stackMaxBytes);
+void* CW_Common_Allocacheck(void);
+
+void CW_Common_Allocaprint(void* pAllocaHint);
 
 //-----------------------------------------------------------------------------
 ///
