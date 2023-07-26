@@ -92,9 +92,11 @@ static void cw_Client_SendTestMsg(int sd,
     cw_Client_msg.str.zero = 0;
     memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Testing following message (%u bytes):\n%s\n",
            (unsigned int)dataBytes,
            pData);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     CW_TlsLib_SendAll(sd,
                       pSecureSocketCtx,
@@ -114,9 +116,11 @@ static void cw_Client_SendToTestMsg(int sd,
     cw_Client_msg.str.zero = 0;
     memcpy(cw_Client_msg.str.payload, pData, dataBytes);
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Testing following message (%u bytes):\n%s\n",
            (unsigned int)dataBytes,
            pData);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     CW_TlsLib_SendToAll(sd,
                         pSecureSocketCtx,
@@ -142,7 +146,9 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 {
     CW_Common_AllocLogMarkerBegin("Context");
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Connecting server\n");
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     int sd = CW_Platform_Socket(true);
 
@@ -156,12 +162,14 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
         CW_Common_Die("sd connect failed");
     }
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Server %d:%d connected\n", ip4Addr, port);
 
 
     printf("TLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     void* pSecurityCtx = NULL;
 
@@ -202,7 +210,9 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 
 
     // Let's test!
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Hello world test\n");
+#endif // defined(CW_ENV_DEBUG_ENABLE)
     cw_Client_SendTestMsg(sd,
                           pSecureSocketCtx,
                           "Hello world",
@@ -244,9 +254,11 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
         CW_Common_Die("can't get sd");
     }
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("DTLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     void* pSecurityCtx = NULL;
 
@@ -293,7 +305,9 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
     CW_Common_AllocLogMarkerBegin("Message");
 
     // Let's test!
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("Hello world test\n");
+#endif // defined(CW_ENV_DEBUG_ENABLE)
     cw_Client_SendToTestMsg(sd,
                             pSecureSocketCtx,
                             ip4Addr,
@@ -397,7 +411,9 @@ int main(int argc, char** argv)
     }
 
 
+#if defined(CW_ENV_DEBUG_ENABLE)
     printf("FINISHED\n");
+#endif // defined(CW_ENV_DEBUG_ENABLE)
 
 
 
