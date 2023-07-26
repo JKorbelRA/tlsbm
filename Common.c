@@ -118,14 +118,14 @@ void* CW_Common_Allocacheck(void)
         pAlloca[i] = cw_Common_canaries[i%4];
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+// #if defined(CW_ENV_DEBUG_ENABLE)
     printf("Filling in %zu bytes of stack with 0x%02x 0x%02x 0x%02x 0x%02x\n",
            i,
            cw_Common_canaries[0],
            cw_Common_canaries[1],
            cw_Common_canaries[2],
            cw_Common_canaries[3]);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+// #endif // defined(CW_ENV_DEBUG_ENABLE)
 
     return pAlloca;
 } // End: CW_Common_Allocacheck()
@@ -153,9 +153,9 @@ void CW_Common_Allocaprint(void* pAllocaHint)
         i++;
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+// #if defined(CW_ENV_DEBUG_ENABLE)
     printf("running %zu positions\n", i);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+// #endif // defined(CW_ENV_DEBUG_ENABLE)
     pAlloca = &pAlloca[i];
 
     size_t freeStack = 0;
@@ -182,9 +182,9 @@ void CW_Common_Allocaprint(void* pAllocaHint)
         CW_Common_Die("cannot write stack usage record line");
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+//#if defined(CW_ENV_DEBUG_ENABLE)
     printf("%zu\n", ALLOCACHECK_STACK_BYTES-freeStack);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+//#endif // defined(CW_ENV_DEBUG_ENABLE)
 
 
     fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);

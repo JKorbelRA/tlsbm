@@ -134,24 +134,24 @@ class HeapStatisticsTest:
 
     def print_statistics(self):
         print(f"--- {self.name} ---")
-        print(f"Handshake Peak: {self.peak}")
-        print(f"Handshake total alloc: {self.total_alloc}")
-        print(f"Handshake total free: {self.total_free}")
-        print(f"Handshake Remaining: {self.used}")
         print(f"Handshake Stack consumption: {self.consumed_stack}")
-        if self.total_alloc != self.total_free:
-            print("The TLS library is leaking handshake!")
-        print(f"Context total alloc: {self.context_alloc}")
-        print(f"Context total free: {self.context_free}")
-        print(f"Context Remaining: {self.context_used}")
-        if self.context_alloc != self.context_free:
-            print("The TLS library is leaking context!")
+        print(f"Handshake Peak: {self.peak}")
         if self.is_mbedtls:
             print(
                 f"Remaining allocated after handshake: {self.remaining_after_handshake-self.mbedtls_reserved_bytes} ({self.remaining_after_handshake})")
         else:
             print(
                 f"Remaining allocated after handshake: {self.remaining_after_handshake}")
+        #print(f"Handshake total alloc: {self.total_alloc}")
+        #print(f"Handshake total free: {self.total_free}")
+        #print(f"Handshake Remaining: {self.used}")
+        if self.total_alloc != self.total_free:
+            print("The TLS library is leaking handshake!")
+        #print(f"Context total alloc: {self.context_alloc}")
+        #print(f"Context total free: {self.context_free}")
+        #print(f"Context Remaining: {self.context_used}")
+        if self.context_alloc != self.context_free:
+            print("The TLS library is leaking context!")
 
 
 class HeapStatistics:
