@@ -29,6 +29,8 @@
 // Macros
 //-----------------------------------------------------------------------------
 
+#define STACK_FILL_CANARY 0xccU
+
 //-----------------------------------------------------------------------------
 // Local data types
 //-----------------------------------------------------------------------------
@@ -48,6 +50,7 @@
 //-----------------------------------------------------------------------------
 // Variable definitions
 //-----------------------------------------------------------------------------
+
 
 static FILE* cw_Common_heapCsv;
 
@@ -121,7 +124,15 @@ void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
 void CW_Common_Allocacheck(size_t stackMaxBytes)
 {
     uint8_t* pAlloca = alloca(stackMaxBytes);
-    memset(pAlloca, 0xccU, stackMaxBytes);
+    memset(pAlloca, STACK_FILL_CANARY, stackMaxBytes);
+
+    size_t i = 0;
+    while (pAlloca[i] == STACK_FILL_CANARY)
+    {
+        i++;
+    }
+
+    printf("Filling in %zu bytes of stack with 0x%02x\n", i, STACK_FILL_CANARY);
 } // End: CW_Common_Allocacheck()
 
 void CW_Common_Allocaprint(size_t stackMaxBytes)
@@ -129,7 +140,7 @@ void CW_Common_Allocaprint(size_t stackMaxBytes)
     uint8_t* pAlloca = alloca(stackMaxBytes);
 
     unsigned int i = 0;
-    for (;pAlloca[i] != 0xcc;i++){}
+    for (;pAlloca[i] != STACK_FILL_CANARY;i++){}
 
     printf("running %u positions\n", i);
     pAlloca = &pAlloca[i];
