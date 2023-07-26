@@ -234,6 +234,10 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
         csPick = &cw_TlsLib_csLists[6][0];
 
     }
+    else
+    {
+        CW_Common_Die("DYING: Unknown suite to mbedTLS.\n");
+    }
 
     mbedtls_ssl_conf_ciphersuites(&pCtx->sslCfg, csPick);
 
