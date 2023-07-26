@@ -88,11 +88,9 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
 
 
-#if defined(CW_ENV_DEBUG_ENABLE)
     printf("TLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     void* pSecurityCtx = NULL;
 
@@ -174,11 +172,9 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
                                      payloadBytes);
                 if (res == payloadBytes)
                 {
-#if defined(CW_ENV_DEBUG_ENABLE)
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
                            (const char*)cw_Server_inMsg.str.payload);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
                 }
 #if defined(CW_ENV_DEBUG_ENABLE)
                 else
@@ -230,11 +226,9 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
 
 
-#if defined(CW_ENV_DEBUG_ENABLE)
     printf("DTLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     void* pSecurityCtx = NULL;
 
@@ -329,11 +323,9 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
                 size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inMsg.str.payloadBytesBe);
                 if ((size_t)res == payloadBytes+2)
                 {
-#if defined(CW_ENV_DEBUG_ENABLE)
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
                            (const char*)cw_Server_inMsg.str.payload);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
                 }
 #if defined(CW_ENV_DEBUG_ENABLE)
                 else
@@ -447,9 +439,7 @@ int main(int argc, char** argv)
         }
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
     printf("FINISHED\n");
-#endif // defined(CW_ENV_DEBUG_ENABLE)
 
     CW_TlsLib_Shutdown();
     CW_Common_Shutdown();
