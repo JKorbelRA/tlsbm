@@ -6,37 +6,64 @@
 #undef NO_PSK
 
 #undef ALT_ECC_SIZE
-#define SMALL_SESSION_CACHE
-#define USE_SLOW_SHA2
-#define USE_SLOW_SHA
-#define GCM_SMALL
+//#define USE_SLOW_SHA2
+//#define USE_SLOW_SHA
+//#define GCM_SMALL
 #define NO_OLD_TLS
 #define RSA_LOW_MEM
+//#define ECC_LOW_MEM
 #define CURVE25519_SMALL
 #define WOLFSSL_SMALL_CERT_VERIFY
-// #define WOLFSSL_SP_X86_64_ASM
 #define NO_OLD_POLY1305
 #define NO_SESSION_CACHE
+#undef WOLFSSL_SMALL_STACK
+
+#define WOLFSSL_SP_NO_MALLOC
+
+#define CURVE25519_SMALL
+#define CURVED25519_SMALL
+#define ED25519_SMALL
+
+#define NO_ERROR_STRINGS
+// #define NO_MD4
+#define NO_MD5
+#define NO_SHA
+// #define NO_RC4
+#define HAVE_NULL_CIPHER
+#define SINGLE_THREADED
+#undef ECC_SHAMIR
+
 #define WOLFSSL_SP_MATH
-#define WOLFSSL_SP_MATH_ALL
+#undef WOLFSSL_SP_MATH_ALL
 #define WOLFSSL_SP_SMALL
 #define WOLFSSL_SP_NO_MALLOC
 #define WOLFSSL_SP_NO_DYN_STACK
-#undef WOLFSSL_SP_384
-#undef WOLFSSL_SP_521
-#undef WOLFSSL_SP_4096
-// #define WOLFSSL_SP_NONBLOCK
 #define WOLFSSL_HAVE_SP_RSA
 #define WOLFSSL_HAVE_SP_ECC
 #define WOLFSSL_HAVE_SP_DH
-// #define WC_ECC_NONBLOCK
-//#define FP_ECC
-// #undef FAST_MATH
+
+#undef WOLFSSL_HAVE_CERT_SERVICE
+// #define NO_DSA
+// #define NO_DH
+#undef NO_WOLFSSL_CLIENT
+#undef WOLFSSL_TLS13
+#undef WC_RSA_PSS
+
+#define WOLFSSL_SP_ECC_384
+#define WOLFSSL_SP_ECC_521
+
+#define WOLFSSL_SP_384
+#define HAVE_ECC384
+
+#define WOLFSSL_SP_521
+#define HAVE_ECC521
+
+#undef WOLFSSL_SP_4096
+
 #define WC_ASN_NAME_MAX 128
 #define WC_CTC_MAX_ALT_SIZE 128
 #undef SESSION_CERTS
 #undef HAVE_SESSION_TICKET
-//#undef FP_ECC
 #undef OPENSSL_EXTRA
 #undef OPENSSL_ALL
 
