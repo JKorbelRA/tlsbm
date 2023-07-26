@@ -159,7 +159,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
     printf("Server %d:%d connected\n", ip4Addr, port);
 
 
-    printf("Picking %s isEcc == %d\n",
+    printf("TLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
 
@@ -244,7 +244,7 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
         CW_Common_Die("can't get sd");
     }
 
-    printf("Picking %s isEcc == %d\n",
+    printf("DTLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
 

@@ -88,7 +88,7 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
 
 
-    printf("Picking %s isEcc == %d\n",
+    printf("TLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
 
@@ -220,7 +220,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
 
 
-    printf("Picking %s isEcc == %d\n",
+    printf("DTLS: Picking %s isEcc == %d\n",
            pSc->pCipherSuite,
            pSc->isEcc);
 
