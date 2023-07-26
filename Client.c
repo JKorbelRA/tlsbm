@@ -78,6 +78,8 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
 
 static Msg_t cw_Client_msg;
 
+static MsgDtls_t cw_Client_dtlsMsg;
+
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
@@ -110,9 +112,9 @@ static void cw_Client_SendToTestMsg(int sd,
                                     uint8_t* pData,
                                     size_t dataBytes)
 {
-    cw_Client_msg.str.payloadBytesBe = CW_Platform_Htons((uint16_t)dataBytes);
-    cw_Client_msg.str.zero = 0;
-    memcpy(cw_Client_msg.str.payload, pData, dataBytes);
+    cw_Client_dtlsMsg.str.payloadBytesBe = CW_Platform_Htons((uint16_t)dataBytes);
+    cw_Client_dtlsMsg.str.zero = 0;
+    memcpy(cw_Client_dtlsMsg.str.payload, pData, dataBytes);
 
     printf("Testing following message (%u bytes):\n%s\n",
            (unsigned int)dataBytes,
@@ -122,7 +124,7 @@ static void cw_Client_SendToTestMsg(int sd,
                         pSecureSocketCtx,
                         serverIp4,
                         port,
-                        cw_Client_msg.msg,
+                        cw_Client_dtlsMsg.msg,
                         dataBytes+2);
 }
 

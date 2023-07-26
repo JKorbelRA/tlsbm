@@ -63,6 +63,7 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 //------------------------------------------------------------------------------
 
 Msg_t cw_Server_inMsg;
+MsgDtls_t cw_Server_inDtlsMsg;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -272,8 +273,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     while (true)
     {
         int peekBytes = CW_Platform_RecvfromPeek(listenSd,
-                                                 cw_Server_inMsg.msg,
-                                                 sizeof(cw_Server_inMsg.msg),
+                                                 cw_Server_inDtlsMsg.msg,
+                                                 sizeof(cw_Server_inDtlsMsg.msg),
                                                  pPeerAddr,
                                                  &peerAddrSize);
         if (peekBytes <= 0)
@@ -316,16 +317,16 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
             uint16_t payloadBytesBe = 0;
             res = CW_TlsLib_Recv(clientSd,
                                  pSecureSocketCtx,
-                                 (uint8_t*)&cw_Server_inMsg.msg,
-                                 sizeof(cw_Server_inMsg.msg));
+                                 (uint8_t*)&cw_Server_inDtlsMsg.msg,
+                                 sizeof(cw_Server_inDtlsMsg.msg));
             if (res >= 2)
             {
-                size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inMsg.str.payloadBytesBe);
+                size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inDtlsMsg.str.payloadBytesBe);
                 if ((size_t)res == payloadBytes+2)
                 {
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
-                           (const char*)cw_Server_inMsg.str.payload);
+                           (const char*)cw_Server_inDtlsMsg.str.payload);
                 }
 #if defined(CW_ENV_DEBUG_ENABLE)
                 else

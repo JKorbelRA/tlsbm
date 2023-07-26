@@ -53,6 +53,20 @@ typedef union
     uint8_t msg[UINT16_MAX + sizeof(uint16_t) + sizeof(uint8_t)];
 } Msg_t;
 
+#define MSG_UDP_MTU 1500
+
+typedef union
+{
+    struct
+    {
+        uint16_t payloadBytesBe;
+        uint8_t payload[MSG_UDP_MTU];
+        uint8_t zero;
+    } str;
+
+    uint8_t msg[MSG_UDP_MTU + sizeof(uint16_t) + sizeof(uint8_t)];
+} MsgDtls_t;
+
 #define ALLOCACHECK_STACK_BYTES 50000
 
 void* CW_Common_Allocacheck(void);
