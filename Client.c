@@ -65,15 +65,11 @@
 
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isRsa,
-                                bool isPsk,
-                                bool isGcm);
+                                SuiteCfg_t* pSc);
 
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isRsa,
-                                 bool isPsk,
-                                 bool isGcm);
+                                 SuiteCfg_t* pSc);
 
 //-----------------------------------------------------------------------------
 // Variable definitions
@@ -142,9 +138,7 @@ static void cw_Client_SendToTestMsg(int sd,
 //-----------------------------------------------------------------------------
 static void cw_Client_TlsClient(uint32_t ip4Addr,
                                 uint16_t port,
-                                bool isRsa,
-                                bool isPsk,
-                                bool isGcm)
+                                SuiteCfg_t* pSc)
 {
     CW_Common_AllocLogMarkerBegin("Context");
     uint8_t* pAllocaHint = CW_Common_Allocacheck();
@@ -165,24 +159,38 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
     printf("Server %d:%d connected\n", ip4Addr, port);
 
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
-                                                        isRsa,
-                                                        isGcm);
-    printf("Picking %s %s %s %s\n",
-           pCfg->pCipherSuite,
-           pCfg->pCaCert,
-           pCfg->pDevCert,
-           pCfg->pDevKey);
+    printf("Picking %s isEcc == %d\n",
+           pSc->pCipherSuite,
+           pSc->isEcc);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         pCfg->pCaCert,
-                                                         TLSLIB_FILE_TYPE_PEM,
-                                                         pCfg->pDevCert,
-                                                         TLSLIB_FILE_TYPE_PEM,
-                                                         pCfg->pDevKey,
-                                                         TLSLIB_FILE_TYPE_DER,
-                                                         pCfg->pCipherSuite,
-                                                         true);
+    void* pSecurityCtx = NULL;
+
+    if (pSc->isEcc)
+    {
+        // ECC
+        pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                       CW_CACERT_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVCERT_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVKEY_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_DER,
+                                                       pSc->pCipherSuite,
+                                                       true);
+    }
+    else
+    {
+        // RSA
+        pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                       CW_CACERT_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVCERT_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVKEY_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_DER,
+                                                       pSc->pCipherSuite,
+                                                       true);
+    }
     CW_Common_AllocLogMarkerEnd("Context");
     CW_Common_AllocLogMarkerBegin("Handshake");
 
@@ -223,9 +231,7 @@ static void cw_Client_TlsClient(uint32_t ip4Addr,
 //-----------------------------------------------------------------------------
 static void cw_Client_DtlsClient(uint32_t ip4Addr,
                                  uint16_t port,
-                                 bool isRsa,
-                                 bool isPsk,
-                                 bool isGcm)
+                                 SuiteCfg_t* pSc)
 {
     CW_Common_AllocLogMarkerBegin("Context");
 
@@ -238,24 +244,39 @@ static void cw_Client_DtlsClient(uint32_t ip4Addr,
         CW_Common_Die("can't get sd");
     }
 
-    SuiteCfg_t* pCfg = CW_Common_GetCipherSuiteAndFiles(isPsk,
-                                                        isRsa,
-                                                        isGcm);
-    printf("Picking %s %s %s %s\n",
-           pCfg->pCipherSuite,
-           pCfg->pCaCert,
-           pCfg->pDevCert,
-           pCfg->pDevKey);
+    printf("Picking %s isEcc == %d\n",
+           pSc->pCipherSuite,
+           pSc->isEcc);
 
-    void* pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
-                                                         pCfg->pCaCert,
-                                                         TLSLIB_FILE_TYPE_PEM,
-                                                         pCfg->pDevCert,
-                                                         TLSLIB_FILE_TYPE_PEM,
-                                                         pCfg->pDevKey,
-                                                         TLSLIB_FILE_TYPE_DER,
-                                                         pCfg->pCipherSuite,
-                                                         false);
+    void* pSecurityCtx = NULL;
+
+    if (pSc->isEcc)
+    {
+        // ECC
+        pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                       CW_CACERT_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVCERT_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVKEY_ECC_PATH,
+                                                       TLSLIB_FILE_TYPE_DER,
+                                                       pSc->pCipherSuite,
+                                                       false);
+    }
+    else
+    {
+        // RSA
+        pSecurityCtx = CW_TlsLib_CreateSecurityContext(false,
+                                                       CW_CACERT_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVCERT_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_PEM,
+                                                       CW_DEVKEY_RSA_PATH,
+                                                       TLSLIB_FILE_TYPE_DER,
+                                                       pSc->pCipherSuite,
+                                                       false);
+    }
+
     CW_Common_AllocLogMarkerEnd("Context");
     CW_Common_AllocLogMarkerBegin("Handshake");
 
@@ -316,7 +337,7 @@ int main(int argc, char** argv)
     else
     {
         // tell user, server IP can be set
-        printf("USAGE: <simpleClient.exe> [serverIP]\n");
+        printf("USAGE: <crazywolf-XX-client.exe> [server_ip]\n");
         exit(-1);
     }
 
@@ -325,64 +346,33 @@ int main(int argc, char** argv)
 
     CW_Common_SetIp4Port(ip4Addr, port);
 
-    printf("Starting TLS client + CERT + ECC\n");
-    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC");
-    cw_Client_TlsClient(ip4Addr, port, false, false, false);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC");
-    CW_Platform_Sleep(1);
+    for (int id = 0; ;id++)
+    {
+        SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
+        if (pSc != NULL)
+        {
+            cw_Client_TlsClient(ip4Addr, port, pSc);
+            CW_Platform_Sleep(1);
+        }
+        else
+        {
+            break;
+        }
+    }
 
-    printf("Starting TLS client + PSK + ECC\n");
-    CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + ECC");
-    cw_Client_TlsClient(ip4Addr, port, false, true, false);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + ECC");
-    CW_Platform_Sleep(1);
-
-    printf("Starting TLS client + CERT + RSA\n");
-    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + RSA");
-    cw_Client_TlsClient(ip4Addr, port, true, false, false);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + RSA");
-    CW_Platform_Sleep(1);
-
-    printf("Starting TLS client + PSK + DHE\n");
-    CW_Common_AllocLogMarkerBegin("Test: TLS + PSK + DHE");
-    cw_Client_TlsClient(ip4Addr, port, true, true, false);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + PSK + DHE");
-    CW_Platform_Sleep(1);
-
-    printf("Starting TLS client + CERT + ECC + GCM\n");
-    CW_Common_AllocLogMarkerBegin("Test: TLS + CERT + ECC + GCM");
-    cw_Client_TlsClient(ip4Addr, port, false, false, true);
-    CW_Common_AllocLogMarkerEnd("Test: TLS + CERT + ECC + GCM");
-    CW_Platform_Sleep(1);
-
-    printf("Starting DTLS client + CERT + ECC\n");
-    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC");
-    cw_Client_DtlsClient(ip4Addr, port, false, false, false);
-    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC");
-    CW_Platform_Sleep(1);
-
-    printf("Starting DTLS client + PSK + ECC\n");
-    CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + ECC");
-    cw_Client_DtlsClient(ip4Addr, port, false, true, false);
-    CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + ECC");
-    CW_Platform_Sleep(1);
-
-    printf("Starting DTLS client + CERT + RSA\n");
-    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + RSA");
-    cw_Client_DtlsClient(ip4Addr, port, true, false, false);
-    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + RSA");
-    CW_Platform_Sleep(1);
-
-    printf("Starting DTLS client + PSK + DHE\n");
-    CW_Common_AllocLogMarkerBegin("Test: DTLS + PSK + DHE");
-    cw_Client_DtlsClient(ip4Addr, port, true, true, false);
-    CW_Common_AllocLogMarkerEnd("Test: DTLS + PSK + DHE");
-    CW_Platform_Sleep(1);
-
-    printf("Starting DTLS client + CERT + ECC + GCM\n");
-    CW_Common_AllocLogMarkerBegin("Test: DTLS + CERT + ECC + GCM");
-    cw_Client_DtlsClient(ip4Addr, port, false, false, true);
-    CW_Common_AllocLogMarkerEnd("Test: DTLS + CERT + ECC + GCM");
+    for (int id = 0; ;id++)
+    {
+        SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
+        if (pSc != NULL)
+        {
+            cw_Client_DtlsClient(ip4Addr, port, pSc);
+            CW_Platform_Sleep(1);
+        }
+        else
+        {
+            break;
+        }
+    }
 
 
     printf("FINISHED\n");
