@@ -12,6 +12,8 @@
 //------------------------------------------------------------------------------
 // Include files
 //------------------------------------------------------------------------------
+#include "include/tlsbm/Common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -19,7 +21,6 @@
 #include <string.h>
 #include <malloc.h>
 
-#include <crazywolf/Common.h>
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -50,39 +51,39 @@
 // Variable definitions
 //-----------------------------------------------------------------------------
 
-static uint8_t cw_Common_canaries[] = {0xca, 0xfe, 0xba, 0xbe};
+static uint8_t tlsbm_Common_canaries[] = {0xca, 0xfe, 0xba, 0xbe};
 
-static FILE* cw_Common_heapCsv;
+static FILE* tlsbm_Common_heapCsv;
 
-static uint32_t cw_Common_ip4Addr;
+static uint32_t tlsbm_Common_ip4Addr;
 
-static uint16_t cw_Common_port;
+static uint16_t tlsbm_Common_port;
 
-static uint8_t cw_Common_psk[] = {
+static uint8_t tlsbm_Common_psk[] = {
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03,
                                 'M', 'A', 'G', 'I', 'C', 0x01, 0x02, 0x03
 };
 
-static const char* cw_Common_pPskIdentity = "WIZZARD";
+static const char* tlsbm_Common_pPskIdentity = "WIZZARD";
 
 
-static SuiteCfg_t cw_Common_suiteCfgs[] = {
-                                           {CW_CIPHER_SUITE_ECC_CERT, true},
-                                           {CW_CIPHER_SUITE_ECC_PSK, true},
-                                           {CW_CIPHER_SUITE_RSA_CERT, false},
-                                           {CW_CIPHER_SUITE_RSA_PSK, false},
-                                           {CW_CIPHER_SUITE_ECC_CERT_GCM,true},
-                                           {CW_CIPHER_SUITE_ECC_PSK_NULL,true},
-                                           {CW_CIPHER_SUITE_ECC_CHACHA20_POLY1305,true},
+static SuiteCfg_t tlsbm_Common_suiteCfgs[] = {
+                                           {TLSBM_CIPHER_SUITE_ECC_CERT, true},
+                                           {TLSBM_CIPHER_SUITE_ECC_PSK, true},
+                                           {TLSBM_CIPHER_SUITE_RSA_CERT, false},
+                                           {TLSBM_CIPHER_SUITE_RSA_PSK, false},
+                                           {TLSBM_CIPHER_SUITE_ECC_CERT_GCM,true},
+                                           {TLSBM_CIPHER_SUITE_ECC_PSK_NULL,true},
+                                           {TLSBM_CIPHER_SUITE_ECC_CHACHA20_POLY1305,true},
 };
 
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
 
-void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
+void TLSBM_Common_Startup(const char* pMethodName, const char* pTlsLibName)
 {
     char filename[64];
     size_t wouldBeWritten = snprintf(filename,
@@ -92,45 +93,45 @@ void CW_Common_Startup(const char* pMethodName, const char* pTlsLibName)
                                      pTlsLibName);
     if (wouldBeWritten > sizeof(filename))
     {
-        CW_Common_Die("cannot write heap usage record line 4 malloc");
+        TLSBM_Common_Die("cannot write heap usage record line 4 malloc");
     }
 
-    cw_Common_heapCsv = fopen(filename, "w");
-    if (cw_Common_heapCsv == NULL)
+    tlsbm_Common_heapCsv = fopen(filename, "w");
+    if (tlsbm_Common_heapCsv == NULL)
     {
-        CW_Common_Die("unable to open .csv file for writing");
+        TLSBM_Common_Die("unable to open .csv file for writing");
     }
 
 
     fwrite("op,ptr,orig_ptr,size_bytes\n",
-           sizeof("op,ptr,orig_ptr,size_bytes\n") - 1, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+           sizeof("op,ptr,orig_ptr,size_bytes\n") - 1, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 }
 
 
-void* CW_Common_Allocacheck(void)
+void* TLSBM_Common_Allocacheck(void)
 {
     uint8_t* pAlloca = alloca(ALLOCACHECK_STACK_BYTES);
 
     size_t i = 0;
     for (; i < ALLOCACHECK_STACK_BYTES; i++)
     {
-        pAlloca[i] = cw_Common_canaries[i%4];
+        pAlloca[i] = tlsbm_Common_canaries[i%4];
     }
 
-// #if defined(CW_ENV_DEBUG_ENABLE)
+// #if defined(TLSBM_ENV_DEBUG_ENABLE)
     printf("Filling in %zu bytes of stack with 0x%02x 0x%02x 0x%02x 0x%02x\n",
            i,
-           cw_Common_canaries[0],
-           cw_Common_canaries[1],
-           cw_Common_canaries[2],
-           cw_Common_canaries[3]);
-// #endif // defined(CW_ENV_DEBUG_ENABLE)
+           tlsbm_Common_canaries[0],
+           tlsbm_Common_canaries[1],
+           tlsbm_Common_canaries[2],
+           tlsbm_Common_canaries[3]);
+// #endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
     return pAlloca;
-} // End: CW_Common_Allocacheck()
+} // End: TLSBM_Common_Allocacheck()
 
-void CW_Common_Allocaprint(void* pAllocaHint)
+void TLSBM_Common_Allocaprint(void* pAllocaHint)
 {
 #ifdef _WIN32
     uint8_t* pAlloca = pAllocaHint;
@@ -142,10 +143,10 @@ void CW_Common_Allocaprint(void* pAllocaHint)
     size_t i = 0;
     while (i < ALLOCACHECK_STACK_BYTES - 4)
     {
-        if (pAlloca[i] == cw_Common_canaries[0]
-            && pAlloca[i + 1] == cw_Common_canaries[1]
-            && pAlloca[i + 2] == cw_Common_canaries[2]
-            && pAlloca[i + 3] == cw_Common_canaries[3])
+        if (pAlloca[i] == tlsbm_Common_canaries[0]
+            && pAlloca[i + 1] == tlsbm_Common_canaries[1]
+            && pAlloca[i + 2] == tlsbm_Common_canaries[2]
+            && pAlloca[i + 3] == tlsbm_Common_canaries[3])
         {
             break;
         }
@@ -153,16 +154,16 @@ void CW_Common_Allocaprint(void* pAllocaHint)
         i++;
     }
 
-// #if defined(CW_ENV_DEBUG_ENABLE)
+// #if defined(TLSBM_ENV_DEBUG_ENABLE)
     printf("running %zu positions\n", i);
-// #endif // defined(CW_ENV_DEBUG_ENABLE)
+// #endif // defined(TLSBM_ENV_DEBUG_ENABLE)
     pAlloca = &pAlloca[i];
 
     size_t freeStack = 0;
     bool ok = true;
     while(true)
     {
-        if (pAlloca[freeStack] != cw_Common_canaries[freeStack%4])
+        if (pAlloca[freeStack] != tlsbm_Common_canaries[freeStack%4])
         {
             break;
         }
@@ -179,17 +180,17 @@ void CW_Common_Allocaprint(void* pAllocaHint)
                                      (size_t)ALLOCACHECK_STACK_BYTES-freeStack);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write stack usage record line");
+        TLSBM_Common_Die("cannot write stack usage record line");
     }
 
-//#if defined(CW_ENV_DEBUG_ENABLE)
+//#if defined(TLSBM_ENV_DEBUG_ENABLE)
     printf("%zu\n", ALLOCACHECK_STACK_BYTES-freeStack);
-//#endif // defined(CW_ENV_DEBUG_ENABLE)
+//#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
-} // End: CW_Common_Allocaprint()
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
+} // End: TLSBM_Common_Allocaprint()
 
 //-----------------------------------------------------------------------------
 ///
@@ -198,13 +199,13 @@ void CW_Common_Allocaprint(void* pAllocaHint)
 /// @param[in] pErrorMsg - error message
 ///
 //-----------------------------------------------------------------------------
-void CW_Common_Die(const char* pErrorMsg)
+void TLSBM_Common_Die(const char* pErrorMsg)
 {
     perror(pErrorMsg);
     exit(1);
-} // End: CW_Common_Die()
+} // End: TLSBM_Common_Die()
 
-void* CW_Common_Malloc(unsigned long size)
+void* TLSBM_Common_Malloc(unsigned long size)
 {
     char buf[64];
 
@@ -212,23 +213,23 @@ void* CW_Common_Malloc(unsigned long size)
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,0x%p,0x0,%zu\n", pPtr, (size_t)size);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage record line 4 malloc");
+        TLSBM_Common_Die("cannot write heap usage record line 4 malloc");
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
     if (size > 512)
     {
         printf("Allocating %zuB\n", size);
     }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 
     return pPtr;
 }
 
-void* CW_Common_Calloc(size_t nitems, size_t itemBytes)
+void* TLSBM_Common_Calloc(size_t nitems, size_t itemBytes)
 {
     size_t size = nitems * itemBytes;
     char buf[64];
@@ -237,23 +238,23 @@ void* CW_Common_Calloc(size_t nitems, size_t itemBytes)
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "M,0x%p,0x0,%zu\n", pPtr, size);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage record line 4 calloc");
+        TLSBM_Common_Die("cannot write heap usage record line 4 calloc");
     }
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
     if (size > 512)
     {
         printf("Allocating %zuB\n", size);
     }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 
     return pPtr;
 }
 
-void* CW_Common_Realloc(void* ptr, unsigned long size)
+void* TLSBM_Common_Realloc(void* ptr, unsigned long size)
 {
     char buf[64];
 
@@ -261,16 +262,16 @@ void* CW_Common_Realloc(void* ptr, unsigned long size)
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "R,0x%p,0x%p,%zu\n", pPtr, ptr, (size_t)size);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage record line 4 realloc");
+        TLSBM_Common_Die("cannot write heap usage record line 4 realloc");
     }
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 
     return pPtr;
 }
 
-void  CW_Common_Free(void* ptr)
+void  TLSBM_Common_Free(void* ptr)
 {
     if (ptr == NULL)
     {
@@ -282,76 +283,76 @@ void  CW_Common_Free(void* ptr)
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "F,0x%p,0x0,0\n", ptr);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage record line 4 free");
+        TLSBM_Common_Die("cannot write heap usage record line 4 free");
     }
 
     free(ptr);
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 }
 
-void  CW_Common_AllocLogMarkerBegin(const char* pMarker)
+void  TLSBM_Common_AllocLogMarkerBegin(const char* pMarker)
 {
     char buf[128];
 
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "B,%s,,\n", pMarker);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage begin marker");
+        TLSBM_Common_Die("cannot write heap usage begin marker");
     }
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 }
 
-void  CW_Common_AllocLogMarkerEnd(const char* pMarker)
+void  TLSBM_Common_AllocLogMarkerEnd(const char* pMarker)
 {
     char buf[128];
 
     size_t wouldBeWritten = snprintf(buf, sizeof(buf), "E,%s,,\n", pMarker);
     if (wouldBeWritten > sizeof(buf))
     {
-        CW_Common_Die("cannot write heap usage end marker");
+        TLSBM_Common_Die("cannot write heap usage end marker");
     }
 
-    fwrite(buf, wouldBeWritten, 1, cw_Common_heapCsv);
-    fflush(cw_Common_heapCsv);
+    fwrite(buf, wouldBeWritten, 1, tlsbm_Common_heapCsv);
+    fflush(tlsbm_Common_heapCsv);
 }
 
 
-const char* CW_Common_GetPskIdentity(void)
+const char* TLSBM_Common_GetPskIdentity(void)
 {
-    return cw_Common_pPskIdentity;
+    return tlsbm_Common_pPskIdentity;
 }
 
-uint8_t* CW_Common_GetPsk(size_t* pPskBytes)
+uint8_t* TLSBM_Common_GetPsk(size_t* pPskBytes)
 {
-    *pPskBytes = sizeof(cw_Common_psk);
-    return cw_Common_psk;
+    *pPskBytes = sizeof(tlsbm_Common_psk);
+    return tlsbm_Common_psk;
 }
 
-void CW_Common_Shutdown(void)
+void TLSBM_Common_Shutdown(void)
 {
-    fflush(cw_Common_heapCsv);
-    fclose(cw_Common_heapCsv);
-}
-
-
-SuiteCfg_t* CW_Common_GetSuiteCfg(int id)
-{
-    return (id < (sizeof(cw_Common_suiteCfgs) / sizeof(SuiteCfg_t))) ? &cw_Common_suiteCfgs[id] : NULL;
+    fflush(tlsbm_Common_heapCsv);
+    fclose(tlsbm_Common_heapCsv);
 }
 
 
-void CW_Common_SetIp4Port(uint32_t ip4Addr, uint16_t port)
+SuiteCfg_t* TLSBM_Common_GetSuiteCfg(int id)
 {
-    cw_Common_ip4Addr = ip4Addr;
-    cw_Common_port = port;
+    return (id < (sizeof(tlsbm_Common_suiteCfgs) / sizeof(SuiteCfg_t))) ? &tlsbm_Common_suiteCfgs[id] : NULL;
 }
 
 
-void CW_Common_GetIp4Port(uint32_t* pIp4Addr, uint16_t* pPort)
+void TLSBM_Common_SetIp4Port(uint32_t ip4Addr, uint16_t port)
 {
-    *pIp4Addr = cw_Common_ip4Addr;
-    *pPort = cw_Common_port;
+    tlsbm_Common_ip4Addr = ip4Addr;
+    tlsbm_Common_port = port;
+}
+
+
+void TLSBM_Common_GetIp4Port(uint32_t* pIp4Addr, uint16_t* pPort)
+{
+    *pIp4Addr = tlsbm_Common_ip4Addr;
+    *pPort = tlsbm_Common_port;
 }

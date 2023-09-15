@@ -24,7 +24,7 @@
  *  limitations under the License.
  */
 
-#include <crazywolf/Common.h>
+#include "../include/tlsbm/Common.h"
 
 /**
  * This is an optional version symbol that enables compatibility handling of
@@ -3659,8 +3659,8 @@
 
 /* To Use Function Macros MBEDTLS_PLATFORM_C must be enabled */
 /* MBEDTLS_PLATFORM_XXX_MACRO and MBEDTLS_PLATFORM_XXX_ALT cannot both be defined */
-#define MBEDTLS_PLATFORM_CALLOC_MACRO        CW_Common_Calloc /**< Default allocator macro to use, can be undefined */
-#define MBEDTLS_PLATFORM_FREE_MACRO            CW_Common_Free /**< Default free macro to use, can be undefined */
+#define MBEDTLS_PLATFORM_CALLOC_MACRO        TLSBM_Common_Calloc /**< Default allocator macro to use, can be undefined */
+#define MBEDTLS_PLATFORM_FREE_MACRO            TLSBM_Common_Free /**< Default free macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_EXIT_MACRO            exit /**< Default exit macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_SETBUF_MACRO      setbuf /**< Default setbuf macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_TIME_MACRO            time /**< Default time macro to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */

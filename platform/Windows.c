@@ -21,8 +21,8 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 
-#include <crazywolf/Common.h>
-#include <crazywolf/Platform.h>
+#include "../include/tlsbm/Common.h"
+#include "../include/tlsbm/Platform.h"
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -66,14 +66,14 @@
 // Init platform.
 //
 //-----------------------------------------------------------------------------
-void CW_Platform_Startup(void)
+void TLSBM_Platform_Startup(void)
 {
     WSADATA wsaData;
     int result = WSAStartup(0x0002, &wsaData);
     if (result != NO_ERROR)
     {
         printf("WSAStartup failed with code %d\n", result);
-        CW_Common_Die("Exiting");
+        TLSBM_Common_Die("Exiting");
     }
 }
 
@@ -83,13 +83,13 @@ void CW_Platform_Startup(void)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-void CW_Platform_Shutdown(void)
+void TLSBM_Platform_Shutdown(void)
 {
     int result = WSACleanup();
     if (result != NO_ERROR)
     {
         printf("WSACleanup failed with code %d.\n", result);
-        CW_Common_Die("Exiting.\n");
+        TLSBM_Common_Die("Exiting.\n");
     }
 }
 
@@ -99,7 +99,7 @@ void CW_Platform_Shutdown(void)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-int CW_Platform_Socket(bool isStream)
+int TLSBM_Platform_Socket(bool isStream)
 {
     if (isStream)
     {
@@ -121,7 +121,7 @@ int CW_Platform_Socket(bool isStream)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
+int TLSBM_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
 {
     struct sockaddr_in srvAddr;
     memset(&srvAddr, sizeof(srvAddr), 0);
@@ -136,7 +136,7 @@ int CW_Platform_Connect(int sd, uint32_t ip4Addr, uint16_t port)
 }
 
 
-int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
+int TLSBM_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
 {
     int res = connect(sd,
                       (struct sockaddr*)pPeerAddr,
@@ -145,18 +145,18 @@ int CW_Platform_ConnectPa(int sd, void* pPeerAddr, size_t peerAddrSize)
 }
 
 
-void CW_Platform_Sleep(uint32_t s)
+void TLSBM_Platform_Sleep(uint32_t s)
 {
     Sleep(s*1000);
 }
 
-void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
+void TLSBM_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 {
     char on = 1;
     int len = sizeof(on);
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &on, len) < 0)
     {
-        CW_Common_Die("setsockopt SO_REUSEADDR failed");
+        TLSBM_Common_Die("setsockopt SO_REUSEADDR failed");
     }
 
     struct sockaddr_in addr;
@@ -166,16 +166,16 @@ void CW_Platform_Bind(int sd, uint32_t ip4Addr, uint16_t port)
 
     if (bind(sd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
-        CW_Common_Die("can't bind socket");
+        TLSBM_Common_Die("can't bind socket");
     }
 }
 
-void CW_Platform_Listen(int sd)
+void TLSBM_Platform_Listen(int sd)
 {
 
     if (listen(sd, SOMAXCONN) == -1)
     {
-        CW_Common_Die("can't listen to socket");
+        TLSBM_Common_Die("can't listen to socket");
     }
 }
 
@@ -185,7 +185,7 @@ void CW_Platform_Listen(int sd)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-int CW_Platform_Accept(int listenSd)
+int TLSBM_Platform_Accept(int listenSd)
 {
     struct sockaddr_in  clientAddr;
     int clientLen = sizeof(clientAddr);
@@ -203,13 +203,13 @@ int CW_Platform_Accept(int listenSd)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-void CW_Platform_CloseSocket(int sd)
+void TLSBM_Platform_CloseSocket(int sd)
 {
     (void)closesocket((SOCKET)sd);
 }
 
 
-int CW_Platform_Recvfrom(int sd,
+int TLSBM_Platform_Recvfrom(int sd,
                          uint8_t* pData,
                          size_t dataBytes,
                          void* pPeerAddr,
@@ -227,7 +227,7 @@ int CW_Platform_Recvfrom(int sd,
 
 }
 
-int CW_Platform_RecvfromPeek(int sd,
+int TLSBM_Platform_RecvfromPeek(int sd,
                              uint8_t* pData,
                              size_t dataBytes,
                              void* pPeerAddr,
@@ -251,7 +251,7 @@ int CW_Platform_RecvfromPeek(int sd,
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-uint16_t CW_Platform_Htons(uint16_t hostNum)
+uint16_t TLSBM_Platform_Htons(uint16_t hostNum)
 {
     return htons(hostNum);
 }
@@ -262,7 +262,7 @@ uint16_t CW_Platform_Htons(uint16_t hostNum)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-uint16_t CW_Platform_Ntohs(uint16_t networkNum)
+uint16_t TLSBM_Platform_Ntohs(uint16_t networkNum)
 {
     return ntohs(networkNum);
 }
@@ -273,7 +273,7 @@ uint16_t CW_Platform_Ntohs(uint16_t networkNum)
 // Shut the platform down.
 //
 //-----------------------------------------------------------------------------
-uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str)
+uint32_t TLSBM_Platform_GetIp4Addr(const char* pIp4Str)
 {
     uint32_t addr = 0;
     InetPton(AF_INET, pIp4Str, &addr);
@@ -281,12 +281,12 @@ uint32_t CW_Platform_GetIp4Addr(const char* pIp4Str)
 }
 
 
-void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port)
+void* TLSBM_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint16_t port)
 {
     struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
     if (pPeerAddr == NULL)
     {
-        CW_Common_Die("peer address allocation failed\n");
+        TLSBM_Common_Die("peer address allocation failed\n");
     }
 
     memset(pPeerAddr, sizeof(struct sockaddr_in), 0);
@@ -296,28 +296,28 @@ void* CW_Platform_CreatePeerAddr4(size_t* pPeerAddrSize, uint32_t ip4Addr, uint1
 
     if (pPeerAddrSize == NULL)
     {
-        CW_Common_Die("peer address size bad arg failed\n");
+        TLSBM_Common_Die("peer address size bad arg failed\n");
     }
     *pPeerAddrSize = sizeof(struct sockaddr_in);
     return pPeerAddr;
 }
 
 
-void CW_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
+void TLSBM_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
                                         uint32_t* pIp4Addr,
                                         uint16_t* pPort)
 {
     if (pPeerAddrIn == NULL)
     {
-        CW_Common_Die("pPeerAddrIn bad arg failed\n");
+        TLSBM_Common_Die("pPeerAddrIn bad arg failed\n");
     }
     if (pIp4Addr == NULL)
     {
-        CW_Common_Die("pIp4Addr bad arg failed\n");
+        TLSBM_Common_Die("pIp4Addr bad arg failed\n");
     }
     if (pPort == NULL)
     {
-        CW_Common_Die("pPort bad arg failed\n");
+        TLSBM_Common_Die("pPort bad arg failed\n");
     }
 
     struct sockaddr_in* pPeerAddr = (struct sockaddr_in*)pPeerAddrIn;
@@ -325,7 +325,7 @@ void CW_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
 
     if (pPeerAddr->sin_family != AF_INET)
     {
-        CW_Common_Die("pPeerAddr->sin_family != AF_INET\n");
+        TLSBM_Common_Die("pPeerAddr->sin_family != AF_INET\n");
     }
 
     *pIp4Addr = pPeerAddr->sin_addr.s_addr;
@@ -333,13 +333,13 @@ void CW_Platform_GetIp4PortFromPeerAddr(void* pPeerAddrIn,
 }
 
 
-void CW_Platform_DeletePeerAddr4(void* pPeerAddr)
+void TLSBM_Platform_DeletePeerAddr4(void* pPeerAddr)
 {
     free(pPeerAddr);
 }
 
 
-void CW_Platform_FlushStdout(void)
+void TLSBM_Platform_FlushStdout(void)
 {
     fflush(stdout);
 }

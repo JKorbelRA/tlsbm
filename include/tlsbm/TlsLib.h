@@ -8,8 +8,8 @@
 /// Copyright (c) 2023 Rockwell Automation Technologies, Inc.
 /// All rights reserved.
 //==============================================================================
-#if !defined(CW_TLSLIB_H)
-#define CW_TLSLIB_H
+#if !defined(TLSBM_TLSLIB_H)
+#define TLSBM_TLSLIB_H
 
 typedef enum
 {
@@ -23,7 +23,7 @@ typedef enum
 /// @brief Init security library.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_Startup(void);
+void TLSBM_TlsLib_Startup(void);
 
 
 //------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ void CW_TlsLib_Startup(void);
 /// @return opaque handle of the security context.
 ///
 //------------------------------------------------------------------------------
-void* CW_TlsLib_CreateSecurityContext(bool isServer,
+void* TLSBM_TlsLib_CreateSecurityContext(bool isServer,
                                       const char* pCaCertPath,
                                       TlsLibFileType_t caCertFileType,
                                       const char* pDevCertPath,
@@ -51,15 +51,15 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 /// @param[in] sd Socket to make secure.
 ///
 /// @param[in] pSecureCtx Pointer to security context created by
-/// CW_TlsLib_CreateSecurityContext().
+/// TLSBM_TlsLib_CreateSecurityContext().
 ///
 /// @return opaque handle of the secure sd context.
 ///
 //------------------------------------------------------------------------------
-void* CW_TlsLib_MakeSocketSecure(int sd,
+void* TLSBM_TlsLib_MakeSocketSecure(int sd,
                                  void* pSecureCtx);
 
-void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
+void* TLSBM_TlsLib_MakeDtlsSocketSecure(int* pSd,
                                  void* pSecureCtx,
                                  void* pPeerAddr,
                                  size_t peerAddrSize);
@@ -73,12 +73,12 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 /// @param[in] sd Socket to de-secure.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @return opaque handle of the secure sd context.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx);
+void TLSBM_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx);
 
 
 //------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx);
 /// @return opaque handle of the security context.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_DestroySecureContext(void* pSecureCtx);
+void TLSBM_TlsLib_DestroySecureContext(void* pSecureCtx);
 
 
 //------------------------------------------------------------------------------
@@ -102,10 +102,10 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx);
 /// @param[in] sd Socket to perform handshake on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx);
+void TLSBM_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx);
 
 
 //------------------------------------------------------------------------------
@@ -117,13 +117,13 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx);
 /// @param[in] sd Socket to perform handshake on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @retval 0 all ok
 /// @retval -1 error
 ///
 //------------------------------------------------------------------------------
-int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx);
+int TLSBM_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx);
 
 //------------------------------------------------------------------------------
 ///
@@ -132,14 +132,14 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx);
 /// @param[in] sd Socket to send data on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @param[in] pData Pointer to buffer to send.
 ///
 /// @param[in] dataBytes Size of the buffer to send in bytes.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_SendAll(int sd,
+void TLSBM_TlsLib_SendAll(int sd,
                        void* pSecureSocketCtx,
                        uint8_t* pData,
                        size_t dataBytes);
@@ -152,14 +152,14 @@ void CW_TlsLib_SendAll(int sd,
 /// @param[in] sd Socket to send data on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @param[in] pData Pointer to buffer to send.
 ///
 /// @param[in] dataBytes Size of the buffer to send in bytes.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_SendToAll(int sd,
+void TLSBM_TlsLib_SendToAll(int sd,
                          void* pSecureSocketCtx,
                          uint32_t ip4Addr,
                          uint16_t port,
@@ -175,14 +175,14 @@ void CW_TlsLib_SendToAll(int sd,
 /// @param[in] sd Socket to send data on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @param[in] pData Pointer to buffer to send.
 ///
 /// @param[in] dataBytes Size of the buffer to send in bytes.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_SendOneByOneByte(int sd,
+void TLSBM_TlsLib_SendOneByOneByte(int sd,
                                 void* pSecureSocketCtx,
                                 uint8_t* pData,
                                 size_t dataBytes);
@@ -195,14 +195,14 @@ void CW_TlsLib_SendOneByOneByte(int sd,
 /// @param[in] sd Socket to send data on.
 ///
 /// @param[in] pSecureSocketCtx Pointer to secure sd context created by
-/// CW_TlsLib_MakeSocketSecure().
+/// TLSBM_TlsLib_MakeSocketSecure().
 ///
 /// @param[in] pData Pointer to buffer to send.
 ///
 /// @param[in] dataBytes Size of the buffer to send in bytes.
 ///
 //------------------------------------------------------------------------------
-void CW_TlsLib_SendAllInOne(int sd,
+void TLSBM_TlsLib_SendAllInOne(int sd,
                             void* pSecureSocketCtx,
                             uint8_t* pData,
                             size_t dataBytes);
@@ -213,14 +213,14 @@ void CW_TlsLib_SendAllInOne(int sd,
 /// @brief Shut the security library down.
 ///
 //-----------------------------------------------------------------------------
-void CW_TlsLib_Shutdown(void);
+void TLSBM_TlsLib_Shutdown(void);
 
-int CW_TlsLib_Recv(int sd,
+int TLSBM_TlsLib_Recv(int sd,
                    void* pSecureSocketCtx,
                    uint8_t* pData,
                    size_t dataBytes);
 
 
-const char* CW_TlsLib_GetName(void);
+const char* TLSBM_TlsLib_GetName(void);
 
-#endif // !defined(CW_TLSLIB_H)
+#endif // !defined(TLSBM_TLSLIB_H)

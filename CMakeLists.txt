@@ -1,5 +1,5 @@
 # set project name
-project(crazywolf LANGUAGES C)
+project(tlsbm LANGUAGES C)
 
 
 # cmake minimum version
@@ -12,7 +12,7 @@ set(C_STANDARD 99)
 # OPTIONS
 
 option(BUILD_SHARED_LIBS "" OFF)
-option(CW_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance." OFF)
+option(TLSBM_ENV_DEBUG_ENABLE "Enables debugging features, DISABLE for performance." OFF)
 
 
 # SOURCES
@@ -33,7 +33,7 @@ elseif ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     list(APPEND COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/platform/Windows.c)
 endif()
 
-add_library(crazywolf-common ${COMMON_SRC})
+add_library(${PROJECT_NAME}-common ${COMMON_SRC})
 
 # INCLUDES
 
@@ -45,11 +45,11 @@ add_subdirectory(wolfssl)
 
 add_executable(${PROJECT_NAME}-wolfssl-client ${CLIENT_SRC})
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-client crazywolf-common tlslib-wolfssl crazywolf-common)
+target_link_libraries(${PROJECT_NAME}-wolfssl-client ${PROJECT_NAME}-common tlslib-wolfssl ${PROJECT_NAME}-common)
 
 add_executable(${PROJECT_NAME}-wolfssl-server ${SERVER_SRC})
 
-target_link_libraries(${PROJECT_NAME}-wolfssl-server crazywolf-common tlslib-wolfssl crazywolf-common)
+target_link_libraries(${PROJECT_NAME}-wolfssl-server ${PROJECT_NAME}-common tlslib-wolfssl ${PROJECT_NAME}-common)
 
 # ------------------------------------------------------------------------------
 
@@ -94,5 +94,5 @@ target_link_libraries(${PROJECT_NAME}-mbedtls-server tlslib-mbedtls)
 
 
 # CONFIG FILE GENERATION
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/crazywolf/Environment.h.in
-               ${CMAKE_BINARY_DIR}/include/crazywolf/Environment.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/tlsbm/Environment.h.in
+               ${CMAKE_BINARY_DIR}/include/tlsbm/Environment.h)

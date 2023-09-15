@@ -10,7 +10,7 @@ set(MBEDTLS_SOURCE "C:/share/gitlab/mbedtls-3.4.0" CACHE PATH "Path to mbedTLS s
 # require C99 standard
 set(C_STANDARD 99)
 
-if (CW_ENV_DEBUG_ENABLE)
+if (TLSBM_ENV_DEBUG_ENABLE)
 add_definitions(-DMBEDTLS_DEBUG_C)
 endif()
 
@@ -30,4 +30,4 @@ set(TLSLIB_SRC
 add_subdirectory("${MBEDTLS_SOURCE}" mbedtls)
 
 add_library(${PROJECT_NAME} STATIC ${TLSLIB_SRC})
-target_link_libraries(${PROJECT_NAME}  crazywolf-common mbedtls crazywolf-common)
+target_link_libraries(${PROJECT_NAME}  tlsbm-common mbedtls tlsbm-common)

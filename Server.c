@@ -21,10 +21,10 @@
 #include <stddef.h>
 
 
-#include <crazywolf/Common.h>
-#include <crazywolf/TlsLib.h>
-#include <crazywolf/Platform.h>
-#include <crazywolf/Environment.h> // Generated header, look into CMake.
+#include <tlsbm/Environment.h> // Generated header, look into CMake.
+#include "include/tlsbm/Common.h"
+#include "include/tlsbm/Platform.h"
+#include "include/tlsbm/TlsLib.h"
 
 //------------------------------------------------------------------------------
 // Constants
@@ -51,10 +51,10 @@
 // Forward function declarations
 //------------------------------------------------------------------------------
 
-static void cw_Server_TlsServer(uint32_t ip4Addr,
+static void tlsbm_Server_TlsServer(uint32_t ip4Addr,
                                 uint16_t port,
                                 SuiteCfg_t* pSc);
-static void cw_Server_DtlsServer(uint32_t ip4Addr,
+static void tlsbm_Server_DtlsServer(uint32_t ip4Addr,
                                  uint16_t port,
                                  SuiteCfg_t* pSc);
 
@@ -62,8 +62,8 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 // Variable definitions
 //------------------------------------------------------------------------------
 
-Msg_t cw_Server_inMsg;
-MsgDtls_t cw_Server_inDtlsMsg;
+Msg_t tlsbm_Server_inMsg;
+MsgDtls_t tlsbm_Server_inDtlsMsg;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -80,13 +80,13 @@ MsgDtls_t cw_Server_inDtlsMsg;
 /// @return return 0 on success
 ///
 //------------------------------------------------------------------------------
-static void cw_Server_TlsServer(uint32_t ip4Addr,
+static void tlsbm_Server_TlsServer(uint32_t ip4Addr,
                                 uint16_t port,
                                 SuiteCfg_t* pSc)
 {
-    CW_Common_AllocLogMarkerBegin("Context");
+    TLSBM_Common_AllocLogMarkerBegin("Context");
 
-    uint8_t* pAllocaHint = CW_Common_Allocacheck();
+    uint8_t* pAllocaHint = TLSBM_Common_Allocacheck();
 
 
     printf("TLS: Picking %s isEcc == %d\n",
@@ -98,12 +98,12 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     if (pSc->isEcc)
     {
         // ECC
-        pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                       CW_CACERT_ECC_PATH,
+        pSecurityCtx = TLSBM_TlsLib_CreateSecurityContext(true,
+                                                       TLSBM_CACERT_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVCERT_ECC_PATH,
+                                                       TLSBM_DEVCERT_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVKEY_ECC_PATH,
+                                                       TLSBM_DEVKEY_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_DER,
                                                        pSc->pCipherSuite,
                                                        true);
@@ -111,101 +111,101 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
     else
     {
         // RSA
-        pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                       CW_CACERT_RSA_PATH,
+        pSecurityCtx = TLSBM_TlsLib_CreateSecurityContext(true,
+                                                       TLSBM_CACERT_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVCERT_RSA_PATH,
+                                                       TLSBM_DEVCERT_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVKEY_RSA_PATH,
+                                                       TLSBM_DEVKEY_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_DER,
                                                        pSc->pCipherSuite,
                                                        true);
     }
 
-    int listenSd = CW_Platform_Socket(true);
+    int listenSd = TLSBM_Platform_Socket(true);
     if (listenSd == -1) //INVALID_SOCKET undef on Unix
     {
-        CW_Common_Die("can't create socket");
+        TLSBM_Common_Die("can't create socket");
     }
 
-    CW_Platform_Bind(listenSd, ip4Addr, port);
-    CW_Platform_Listen(listenSd);
+    TLSBM_Platform_Bind(listenSd, ip4Addr, port);
+    TLSBM_Platform_Listen(listenSd);
 
     while (true)
     {
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
         printf("Accepting new client\n");
-#endif // defined(CW_ENV_DEBUG_ENABLE)
-        int sd = CW_Platform_Accept(listenSd);
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
+        int sd = TLSBM_Platform_Accept(listenSd);
 
         if (sd < 0)
         {
             continue;
         }
-        CW_Common_AllocLogMarkerEnd("Context");
-        CW_Common_AllocLogMarkerBegin("Handshake");
-        void* pSecureSocketCtx = CW_TlsLib_MakeSocketSecure(sd,
+        TLSBM_Common_AllocLogMarkerEnd("Context");
+        TLSBM_Common_AllocLogMarkerBegin("Handshake");
+        void* pSecureSocketCtx = TLSBM_TlsLib_MakeSocketSecure(sd,
                                                             pSecurityCtx);
 
-        int res = CW_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
+        int res = TLSBM_TlsLib_ServerHandshake(sd, pSecureSocketCtx);
         if (res != 0)
         {
-            CW_Platform_CloseSocket(sd);
+            TLSBM_Platform_CloseSocket(sd);
             continue;
         }
 
 
-        CW_Common_AllocLogMarkerEnd("Handshake");
-        CW_Common_AllocLogMarkerBegin("Message");
+        TLSBM_Common_AllocLogMarkerEnd("Handshake");
+        TLSBM_Common_AllocLogMarkerBegin("Message");
         while (res == 0)
         {
             uint16_t payloadBytesBe = 0;
-            res = CW_TlsLib_Recv(sd,
+            res = TLSBM_TlsLib_Recv(sd,
                                  pSecureSocketCtx,
                                  (uint8_t*)&payloadBytesBe,
                                  2);
             if (res == 2)
             {
-                size_t payloadBytes = CW_Platform_Ntohs(payloadBytesBe);
-                res = CW_TlsLib_Recv(sd,
+                size_t payloadBytes = TLSBM_Platform_Ntohs(payloadBytesBe);
+                res = TLSBM_TlsLib_Recv(sd,
                                      pSecureSocketCtx,
-                                     (uint8_t*)&cw_Server_inMsg.str.payload,
+                                     (uint8_t*)&tlsbm_Server_inMsg.str.payload,
                                      payloadBytes);
                 if (res == payloadBytes)
                 {
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
-                           (const char*)cw_Server_inMsg.str.payload);
+                           (const char*)tlsbm_Server_inMsg.str.payload);
                 }
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
                 else
                 {
                     printf("Recv payload failure\n");
                 }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
             }
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
             else
             {
                 printf("Recv hdr failure\n");
             }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
         }
 
-        CW_Common_AllocLogMarkerEnd("Message");
+        TLSBM_Common_AllocLogMarkerEnd("Message");
 
 
-        CW_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
-        CW_Platform_CloseSocket(sd);
-        CW_Platform_FlushStdout();
+        TLSBM_TlsLib_UnmakeSocketSecure(sd, pSecureSocketCtx);
+        TLSBM_Platform_CloseSocket(sd);
+        TLSBM_Platform_FlushStdout();
 
         break;
     }
 
-    CW_TlsLib_DestroySecureContext(pSecurityCtx);
-    CW_Platform_CloseSocket(listenSd);
-    CW_Common_Allocaprint(pAllocaHint);
-} // End: cw_Server_TlsServer()
+    TLSBM_TlsLib_DestroySecureContext(pSecurityCtx);
+    TLSBM_Platform_CloseSocket(listenSd);
+    TLSBM_Common_Allocaprint(pAllocaHint);
+} // End: tlsbm_Server_TlsServer()
 
 
 //------------------------------------------------------------------------------
@@ -218,13 +218,13 @@ static void cw_Server_TlsServer(uint32_t ip4Addr,
 /// @return return 0 on success
 ///
 //------------------------------------------------------------------------------
-static void cw_Server_DtlsServer(uint32_t ip4Addr,
+static void tlsbm_Server_DtlsServer(uint32_t ip4Addr,
                                  uint16_t port,
                                  SuiteCfg_t* pSc)
 {
 
-    CW_Common_AllocLogMarkerBegin("Context");
-    uint8_t* pAllocaHint = CW_Common_Allocacheck();
+    TLSBM_Common_AllocLogMarkerBegin("Context");
+    uint8_t* pAllocaHint = TLSBM_Common_Allocacheck();
 
 
     printf("DTLS: Picking %s isEcc == %d\n",
@@ -236,12 +236,12 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     if (pSc->isEcc)
     {
         // ECC
-        pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                       CW_CACERT_ECC_PATH,
+        pSecurityCtx = TLSBM_TlsLib_CreateSecurityContext(true,
+                                                       TLSBM_CACERT_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVCERT_ECC_PATH,
+                                                       TLSBM_DEVCERT_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVKEY_ECC_PATH,
+                                                       TLSBM_DEVKEY_ECC_PATH,
                                                        TLSLIB_FILE_TYPE_DER,
                                                        pSc->pCipherSuite,
                                                        false);
@@ -249,32 +249,32 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
     else
     {
         // RSA
-        pSecurityCtx = CW_TlsLib_CreateSecurityContext(true,
-                                                       CW_CACERT_RSA_PATH,
+        pSecurityCtx = TLSBM_TlsLib_CreateSecurityContext(true,
+                                                       TLSBM_CACERT_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVCERT_RSA_PATH,
+                                                       TLSBM_DEVCERT_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_PEM,
-                                                       CW_DEVKEY_RSA_PATH,
+                                                       TLSBM_DEVKEY_RSA_PATH,
                                                        TLSLIB_FILE_TYPE_DER,
                                                        pSc->pCipherSuite,
                                                        false);
     }
 
-    int listenSd = CW_Platform_Socket(false);
+    int listenSd = TLSBM_Platform_Socket(false);
     if (listenSd == -1) //INVALID_SOCKET undef on Unix
     {
-        CW_Common_Die("can't create socket");
+        TLSBM_Common_Die("can't create socket");
     }
 
-    CW_Platform_Bind(listenSd, 0, port);
+    TLSBM_Platform_Bind(listenSd, 0, port);
     size_t peerAddrSize = 0;
-    void* pPeerAddr = CW_Platform_CreatePeerAddr4(&peerAddrSize, 0, 0);
+    void* pPeerAddr = TLSBM_Platform_CreatePeerAddr4(&peerAddrSize, 0, 0);
 
     while (true)
     {
-        int peekBytes = CW_Platform_RecvfromPeek(listenSd,
-                                                 cw_Server_inDtlsMsg.msg,
-                                                 sizeof(cw_Server_inDtlsMsg.msg),
+        int peekBytes = TLSBM_Platform_RecvfromPeek(listenSd,
+                                                 tlsbm_Server_inDtlsMsg.msg,
+                                                 sizeof(tlsbm_Server_inDtlsMsg.msg),
                                                  pPeerAddr,
                                                  &peerAddrSize);
         if (peekBytes <= 0)
@@ -282,10 +282,10 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
             continue;
         }
 
-        CW_Common_AllocLogMarkerEnd("Context");
-        CW_Common_AllocLogMarkerBegin("Handshake");
+        TLSBM_Common_AllocLogMarkerEnd("Context");
+        TLSBM_Common_AllocLogMarkerBegin("Handshake");
         int clientSd = listenSd;
-        void* pSecureSocketCtx = CW_TlsLib_MakeDtlsSocketSecure(&clientSd,
+        void* pSecureSocketCtx = TLSBM_TlsLib_MakeDtlsSocketSecure(&clientSd,
                                                                 pSecurityCtx,
                                                                 pPeerAddr,
                                                                 peerAddrSize);
@@ -293,71 +293,71 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
         {
             // Weird accept way follows (mbedTLS):
 
-            listenSd = CW_Platform_Socket(false);
+            listenSd = TLSBM_Platform_Socket(false);
             if (listenSd == -1) //INVALID_SOCKET undef on Unix
             {
-                CW_Common_Die("can't create socket");
+                TLSBM_Common_Die("can't create socket");
             }
 
-            CW_Platform_Bind(listenSd, 0, port);
+            TLSBM_Platform_Bind(listenSd, 0, port);
         }
 
-        int res = CW_TlsLib_ServerHandshake(clientSd, pSecureSocketCtx);
+        int res = TLSBM_TlsLib_ServerHandshake(clientSd, pSecureSocketCtx);
         if (res != 0)
         {
-            CW_Platform_CloseSocket(clientSd);
+            TLSBM_Platform_CloseSocket(clientSd);
             continue;
         }
 
-        CW_Common_AllocLogMarkerEnd("Handshake");
-        CW_Common_AllocLogMarkerBegin("Message");
+        TLSBM_Common_AllocLogMarkerEnd("Handshake");
+        TLSBM_Common_AllocLogMarkerBegin("Message");
 
         while (res == 0)
         {
             uint16_t payloadBytesBe = 0;
-            res = CW_TlsLib_Recv(clientSd,
+            res = TLSBM_TlsLib_Recv(clientSd,
                                  pSecureSocketCtx,
-                                 (uint8_t*)&cw_Server_inDtlsMsg.msg,
-                                 sizeof(cw_Server_inDtlsMsg.msg));
+                                 (uint8_t*)&tlsbm_Server_inDtlsMsg.msg,
+                                 sizeof(tlsbm_Server_inDtlsMsg.msg));
             if (res >= 2)
             {
-                size_t payloadBytes = CW_Platform_Ntohs(cw_Server_inDtlsMsg.str.payloadBytesBe);
+                size_t payloadBytes = TLSBM_Platform_Ntohs(tlsbm_Server_inDtlsMsg.str.payloadBytesBe);
                 if ((size_t)res == payloadBytes+2)
                 {
                     printf("\nMsg size: %d\nMsg:\n%s\n",
                            (int)payloadBytes,
-                           (const char*)cw_Server_inDtlsMsg.str.payload);
+                           (const char*)tlsbm_Server_inDtlsMsg.str.payload);
                 }
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
                 else
                 {
                     printf("Recv payload failure\n");
                 }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
             }
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
             else
             {
                 printf("Recv hdr failure\n");
             }
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
         }
 
-        CW_Common_AllocLogMarkerEnd("Message");
+        TLSBM_Common_AllocLogMarkerEnd("Message");
 
 
-        CW_TlsLib_UnmakeSocketSecure(clientSd, pSecureSocketCtx);
-        CW_Platform_CloseSocket(clientSd);
-        CW_Platform_FlushStdout();
+        TLSBM_TlsLib_UnmakeSocketSecure(clientSd, pSecureSocketCtx);
+        TLSBM_Platform_CloseSocket(clientSd);
+        TLSBM_Platform_FlushStdout();
 
         break;
     }
 
-    CW_Platform_DeletePeerAddr4(pPeerAddr);
-    CW_TlsLib_DestroySecureContext(pSecurityCtx);
-    CW_Platform_CloseSocket(listenSd);
-    CW_Common_Allocaprint(pAllocaHint);
-} // End: cw_Server_DtlsServer()
+    TLSBM_Platform_DeletePeerAddr4(pPeerAddr);
+    TLSBM_TlsLib_DestroySecureContext(pSecurityCtx);
+    TLSBM_Platform_CloseSocket(listenSd);
+    TLSBM_Common_Allocaprint(pAllocaHint);
+} // End: tlsbm_Server_DtlsServer()
 
 
 //------------------------------------------------------------------------------
@@ -367,9 +367,9 @@ static void cw_Server_DtlsServer(uint32_t ip4Addr,
 //------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
-    CW_Platform_Startup();
-    CW_Common_Startup("server", CW_TlsLib_GetName());
-    CW_TlsLib_Startup();
+    TLSBM_Platform_Startup();
+    TLSBM_Common_Startup("server", TLSBM_TlsLib_GetName());
+    TLSBM_TlsLib_Startup();
 
     uint16_t port = SIMPLE_SSL_PORT;
     char* pServerIp4;
@@ -382,19 +382,19 @@ int main(int argc, char** argv)
     else
     {
         // tell user, server IP can be set
-        printf("USAGE: <crazywolf-XX-server.exe> [server_ip]\n");
+        printf("USAGE: <tlsbm-XX-server.exe> [server_ip]\n");
         exit(-1);
     }
 
-    uint32_t ip4Addr = CW_Platform_GetIp4Addr(pServerIp4);
+    uint32_t ip4Addr = TLSBM_Platform_GetIp4Addr(pServerIp4);
 
 
-    CW_Common_SetIp4Port(ip4Addr, port);
+    TLSBM_Common_SetIp4Port(ip4Addr, port);
     char testName[128];
 
     for (int id = 0; ;id++)
     {
-        SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
+        SuiteCfg_t* pSc = TLSBM_Common_GetSuiteCfg(id);
         if (pSc != NULL)
         {
             size_t wouldBeWritten = snprintf(testName, sizeof(testName),
@@ -402,13 +402,13 @@ int main(int argc, char** argv)
                                              pSc->pCipherSuite);
             if (wouldBeWritten > sizeof(testName))
             {
-                CW_Common_Die("cannot write test marker");
+                TLSBM_Common_Die("cannot write test marker");
             }
 
-            CW_Common_AllocLogMarkerBegin(testName);
-            cw_Server_TlsServer(ip4Addr, port, pSc);
-            CW_Common_AllocLogMarkerEnd(testName);
-            CW_Platform_Sleep(1);
+            TLSBM_Common_AllocLogMarkerBegin(testName);
+            tlsbm_Server_TlsServer(ip4Addr, port, pSc);
+            TLSBM_Common_AllocLogMarkerEnd(testName);
+            TLSBM_Platform_Sleep(1);
         }
         else
         {
@@ -418,7 +418,7 @@ int main(int argc, char** argv)
 
     for (int id = 0; ;id++)
     {
-        SuiteCfg_t* pSc = CW_Common_GetSuiteCfg(id);
+        SuiteCfg_t* pSc = TLSBM_Common_GetSuiteCfg(id);
         if (pSc != NULL)
         {
             size_t wouldBeWritten = snprintf(testName, sizeof(testName),
@@ -426,13 +426,13 @@ int main(int argc, char** argv)
                                              pSc->pCipherSuite);
             if (wouldBeWritten > sizeof(testName))
             {
-                CW_Common_Die("cannot write test marker");
+                TLSBM_Common_Die("cannot write test marker");
             }
 
-            CW_Common_AllocLogMarkerBegin(testName);
-            cw_Server_DtlsServer(ip4Addr, port, pSc);
-            CW_Common_AllocLogMarkerEnd(testName);
-            CW_Platform_Sleep(1);
+            TLSBM_Common_AllocLogMarkerBegin(testName);
+            tlsbm_Server_DtlsServer(ip4Addr, port, pSc);
+            TLSBM_Common_AllocLogMarkerEnd(testName);
+            TLSBM_Platform_Sleep(1);
         }
         else
         {
@@ -442,9 +442,9 @@ int main(int argc, char** argv)
 
     printf("FINISHED\n");
 
-    CW_TlsLib_Shutdown();
-    CW_Common_Shutdown();
-    CW_Platform_Shutdown();
+    TLSBM_TlsLib_Shutdown();
+    TLSBM_Common_Shutdown();
+    TLSBM_Platform_Shutdown();
 
     return 0;
 } // End: main()

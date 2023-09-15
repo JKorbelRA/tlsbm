@@ -28,4 +28,4 @@ set(TLSLIB_SRC
 add_subdirectory("${WOLFSSL_SOURCE}" wolfssl)
 
 add_library(${PROJECT_NAME} STATIC ${TLSLIB_SRC})
-target_link_libraries(${PROJECT_NAME}  crazywolf-common wolfssl crazywolf-common)
+target_link_libraries(${PROJECT_NAME}  tlsbm-common wolfssl tlsbm-common)

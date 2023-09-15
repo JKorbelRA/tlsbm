@@ -12,16 +12,17 @@
 //------------------------------------------------------------------------------
 // Include files
 //------------------------------------------------------------------------------
+#include "../include/tlsbm/TlsLib.h"
+
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
 
 
-#include <crazywolf/Common.h>
-#include <crazywolf/Platform.h>
-#include <crazywolf/TlsLib.h>
-#include <crazywolf/Environment.h> // Generated header, look into CMake.
+#include <tlsbm/Environment.h> // Generated header, look into CMake.
 
+#include "../include/tlsbm/Common.h"
+#include "../include/tlsbm/Platform.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/x509.h"
@@ -74,20 +75,20 @@ typedef struct
 // Local constants
 //-----------------------------------------------------------------------------
 
-#if defined(CW_ENV_DEBUG_ENABLE)
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
 /// @brief Error buffer for error texts.
-static char cw_TlsLib_errBuffer[16000] = {0};
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+static char tlsbm_TlsLib_errBuffer[16000] = {0};
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
 
-static void cw_TlsLib_Debug(void* ctx, int level,
+static void tlsbm_TlsLib_Debug(void* ctx, int level,
     const char* file, int line,
     const char* str);
 
-mbedtls_entropy_context cw_TlsLib_entropy;
-mbedtls_ctr_drbg_context cw_TlsLib_ctrDrbg;
+mbedtls_entropy_context tlsbm_TlsLib_entropy;
+mbedtls_ctr_drbg_context tlsbm_TlsLib_ctrDrbg;
 
-int cw_TlsLib_csLists[7][2] =
+int tlsbm_TlsLib_csLists[7][2] =
 {
  {MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, 0},
  {MBEDTLS_TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256, 0},
@@ -113,19 +114,19 @@ int cw_TlsLib_csLists[7][2] =
 // Init security library.
 //
 //-----------------------------------------------------------------------------
-void CW_TlsLib_Startup(void)
+void TLSBM_TlsLib_Startup(void)
 {
     const char *pers = "ssl_server";
 
-    mbedtls_ctr_drbg_init( &cw_TlsLib_ctrDrbg );
-    mbedtls_entropy_init( &cw_TlsLib_entropy );
-    if( mbedtls_ctr_drbg_seed( &cw_TlsLib_ctrDrbg, mbedtls_entropy_func, &cw_TlsLib_entropy,
+    mbedtls_ctr_drbg_init( &tlsbm_TlsLib_ctrDrbg );
+    mbedtls_entropy_init( &tlsbm_TlsLib_entropy );
+    if( mbedtls_ctr_drbg_seed( &tlsbm_TlsLib_ctrDrbg, mbedtls_entropy_func, &tlsbm_TlsLib_entropy,
                                (const unsigned char *) pers,
                                strlen( pers ) )  != 0 )
     {
-        CW_Common_Die("mbedtls_ctr_drbg_seed error\n");
+        TLSBM_Common_Die("mbedtls_ctr_drbg_seed error\n");
     }
-} // End: CW_TlsLib_Startup()
+} // End: TLSBM_TlsLib_Startup()
 
 
 //------------------------------------------------------------------------------
@@ -133,7 +134,7 @@ void CW_TlsLib_Startup(void)
 // Creates a security context. Returns security context handle.
 //
 //------------------------------------------------------------------------------
-void* CW_TlsLib_CreateSecurityContext(bool isServer,
+void* TLSBM_TlsLib_CreateSecurityContext(bool isServer,
                                       const char* pCaCertPath,
                                       TlsLibFileType_t caCertFileType,
                                       const char* pDevCertPath,
@@ -147,16 +148,16 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
 
     if (isTls)
     {
-        pCtx = (MbedTlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
+        pCtx = (MbedTlsContext_t*)TLSBM_Common_Malloc(sizeof(MbedTlsContext_t));
     }
     else
     {
-        pCtx = (MbedTlsContext_t*)CW_Common_Malloc(sizeof(MbedTlsContext_t));
+        pCtx = (MbedTlsContext_t*)TLSBM_Common_Malloc(sizeof(MbedTlsContext_t));
     }
 
     if (pCtx == 0)
     {
-        CW_Common_Die("malloc cxt failed\n");
+        TLSBM_Common_Die("malloc cxt failed\n");
     }
 
     if (!isTls)
@@ -168,13 +169,13 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     mbedtls_x509_crt_init(&pCtx->caCert);
     int ret = mbedtls_x509_crt_parse_file(&pCtx->caCert, pCaCertPath);
     if (ret != 0) {
-        CW_Common_Die("mbedtls_x509_crt_parse_file ca\n");
+        TLSBM_Common_Die("mbedtls_x509_crt_parse_file ca\n");
     }
 
     mbedtls_x509_crt_init( &pCtx->devCert );
     ret = mbedtls_x509_crt_parse_file(&pCtx->devCert, pDevCertPath);
     if (ret != 0) {
-        CW_Common_Die("mbedtls_x509_crt_parse_file dc\n");
+        TLSBM_Common_Die("mbedtls_x509_crt_parse_file dc\n");
     }
 
     mbedtls_pk_init( &pCtx->devKey );
@@ -182,9 +183,9 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                     pDevKeyPath,
                                     NULL,
                                     mbedtls_ctr_drbg_random,
-                                    &cw_TlsLib_ctrDrbg);
+                                    &tlsbm_TlsLib_ctrDrbg);
     if (ret != 0) {
-        CW_Common_Die("mbedtls_pk_parse_keyfile error\n");
+        TLSBM_Common_Die("mbedtls_pk_parse_keyfile error\n");
     }
 
     mbedtls_ssl_config_init( &pCtx->sslCfg );
@@ -195,64 +196,64 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
                                     isTls ? MBEDTLS_SSL_TRANSPORT_STREAM : MBEDTLS_SSL_TRANSPORT_DATAGRAM,
                                     MBEDTLS_SSL_PRESET_DEFAULT) != 0)
     {
-        CW_Common_Die("mbedtls_ssl_config_defaults error\n");
+        TLSBM_Common_Die("mbedtls_ssl_config_defaults error\n");
     }
 
     int* csPick = NULL;
 
-    if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_CERT) == 0)
+    if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_ECC_CERT) == 0)
     {
-        csPick = &cw_TlsLib_csLists[0][0];
+        csPick = &tlsbm_TlsLib_csLists[0][0];
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_PSK) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_ECC_PSK) == 0)
     {
-        csPick = &cw_TlsLib_csLists[1][0];
+        csPick = &tlsbm_TlsLib_csLists[1][0];
 
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_RSA_CERT) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_RSA_CERT) == 0)
     {
-        csPick = &cw_TlsLib_csLists[2][0];
+        csPick = &tlsbm_TlsLib_csLists[2][0];
 
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_RSA_PSK) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_RSA_PSK) == 0)
     {
-        csPick = &cw_TlsLib_csLists[3][0];
+        csPick = &tlsbm_TlsLib_csLists[3][0];
 
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_CERT_GCM) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_ECC_CERT_GCM) == 0)
     {
-        csPick = &cw_TlsLib_csLists[4][0];
+        csPick = &tlsbm_TlsLib_csLists[4][0];
 
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_PSK_NULL) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_ECC_PSK_NULL) == 0)
     {
-        csPick = &cw_TlsLib_csLists[5][0];
+        csPick = &tlsbm_TlsLib_csLists[5][0];
 
     }
-    else if (strcmp(pCipherList, CW_CIPHER_SUITE_ECC_CHACHA20_POLY1305) == 0)
+    else if (strcmp(pCipherList, TLSBM_CIPHER_SUITE_ECC_CHACHA20_POLY1305) == 0)
     {
-        csPick = &cw_TlsLib_csLists[6][0];
+        csPick = &tlsbm_TlsLib_csLists[6][0];
 
     }
     else
     {
-        CW_Common_Die("DYING: Unknown suite to mbedTLS.\n");
+        TLSBM_Common_Die("DYING: Unknown suite to mbedTLS.\n");
     }
 
     mbedtls_ssl_conf_ciphersuites(&pCtx->sslCfg, csPick);
 
 
-    mbedtls_ssl_conf_rng(&pCtx->sslCfg, mbedtls_ctr_drbg_random, &cw_TlsLib_ctrDrbg);
-    mbedtls_ssl_conf_dbg(&pCtx->sslCfg, cw_TlsLib_Debug, stdout);
-#if defined(CW_ENV_DEBUG_ENABLE)
+    mbedtls_ssl_conf_rng(&pCtx->sslCfg, mbedtls_ctr_drbg_random, &tlsbm_TlsLib_ctrDrbg);
+    mbedtls_ssl_conf_dbg(&pCtx->sslCfg, tlsbm_TlsLib_Debug, stdout);
+#if defined(TLSBM_ENV_DEBUG_ENABLE)
     mbedtls_debug_set_threshold(4);
-#endif // defined(CW_ENV_DEBUG_ENABLE)
+#endif // defined(TLSBM_ENV_DEBUG_ENABLE)
 
 
-    const char* pPskIdentity = CW_Common_GetPskIdentity();
+    const char* pPskIdentity = TLSBM_Common_GetPskIdentity();
     size_t pskIdentitySize = strlen(pPskIdentity);
     size_t pskBytes = 0;
-    uint8_t* pPsk = CW_Common_GetPsk(&pskBytes);
+    uint8_t* pPsk = TLSBM_Common_GetPsk(&pskBytes);
 
     mbedtls_ssl_conf_psk(&pCtx->sslCfg, pPsk, pskBytes, (const uint8_t*)pPskIdentity, pskIdentitySize);
     mbedtls_ssl_conf_read_timeout(&pCtx->sslCfg, READ_TIMEOUT_MS);
@@ -262,16 +263,16 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     mbedtls_ssl_conf_ca_chain(&pCtx->sslCfg, &pCtx->caCert, NULL);
     if (mbedtls_ssl_conf_own_cert(&pCtx->sslCfg, &pCtx->devCert, &pCtx->devKey) != 0)
     {
-        CW_Common_Die("mbedtls_ssl_conf_own_cert error\n");
+        TLSBM_Common_Die("mbedtls_ssl_conf_own_cert error\n");
     }
 
     if (!isTls)
     {
         if (mbedtls_ssl_cookie_setup(&pCtx->cookies,
                                      mbedtls_ctr_drbg_random,
-                                     &cw_TlsLib_ctrDrbg) != 0)
+                                     &tlsbm_TlsLib_ctrDrbg) != 0)
         {
-            CW_Common_Die("mbedtls_ssl_conf_own_cert error\n");
+            TLSBM_Common_Die("mbedtls_ssl_conf_own_cert error\n");
         }
 
         mbedtls_ssl_conf_dtls_cookies(&pCtx->sslCfg,
@@ -284,10 +285,10 @@ void* CW_TlsLib_CreateSecurityContext(bool isServer,
     pCtx->isTls = isTls;
 
     return pCtx;
-} // End: CW_TlsLib_CreateSecurityContext()
+} // End: TLSBM_TlsLib_CreateSecurityContext()
 
 
-static void cw_TlsLib_Debug(void *ctx, int level,
+static void tlsbm_TlsLib_Debug(void *ctx, int level,
                             const char *file, int line,
                             const char *str)
 {
@@ -302,18 +303,18 @@ static void cw_TlsLib_Debug(void *ctx, int level,
 // Makes a sd secure. Returns secure sd context handle.
 //
 //--------------------------------------------------------------------------
-void* CW_TlsLib_MakeSocketSecure(int sd,
+void* TLSBM_TlsLib_MakeSocketSecure(int sd,
                                  void* pSecureCtx)
 {
     MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
-    MbedTlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedTlsObject_t));
+    MbedTlsObject_t* pSecureSocketContext = TLSBM_Common_Malloc(sizeof(MbedTlsObject_t));
 
     mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
     if (mbedtls_ssl_setup(&pSecureSocketContext->sslCtx, &pCtx->sslCfg) != 0)
     {
-        CW_Common_Die("mbedtls_ssl_setup error\n");
+        TLSBM_Common_Die("mbedtls_ssl_setup error\n");
     }
 
     mbedtls_ssl_set_timer_cb(&pSecureSocketContext->sslCtx,
@@ -331,7 +332,7 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 
     return pSecureSocketContext;
 
-} // End: CW_TlsLib_MakeSocketSecure()
+} // End: TLSBM_TlsLib_MakeSocketSecure()
 
 
 //------------------------------------------------------------------------------
@@ -339,20 +340,20 @@ void* CW_TlsLib_MakeSocketSecure(int sd,
 // Makes a sd secure. Returns secure sd context handle.
 //
 //--------------------------------------------------------------------------
-void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
+void* TLSBM_TlsLib_MakeDtlsSocketSecure(int* pSd,
                                      void* pSecureCtx,
                                      void* pPeerAddr,
                                      size_t peerAddrSize)
 {
     MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
-    MbedTlsObject_t* pSecureSocketContext = CW_Common_Malloc(sizeof(MbedTlsObject_t));
+    MbedTlsObject_t* pSecureSocketContext = TLSBM_Common_Malloc(sizeof(MbedTlsObject_t));
 
     mbedtls_ssl_init(&pSecureSocketContext->sslCtx);
 
     if (mbedtls_ssl_setup(&pSecureSocketContext->sslCtx, &pCtx->sslCfg) != 0)
     {
-        CW_Common_Die("mbedtls_ssl_setup error\n");
+        TLSBM_Common_Die("mbedtls_ssl_setup error\n");
     }
 
     mbedtls_ssl_set_timer_cb(&pSecureSocketContext->sslCtx,
@@ -370,9 +371,9 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 
     uint32_t ip4Addr;
     uint16_t port;
-    CW_Common_GetIp4Port(&ip4Addr, &port);
+    TLSBM_Common_GetIp4Port(&ip4Addr, &port);
 
-    CW_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
+    TLSBM_Platform_ConnectPa(*pSd, pPeerAddr, peerAddrSize);
 
     pSecureSocketContext->netCtx.fd = *pSd;
     mbedtls_ssl_set_bio(&pSecureSocketContext->sslCtx,
@@ -383,7 +384,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
     *pSd = -1;
 
     return pSecureSocketContext;
-} // End: CW_TlsLib_MakeSocketSecure()
+} // End: TLSBM_TlsLib_MakeSocketSecure()
 
 
 //------------------------------------------------------------------------------
@@ -392,7 +393,7 @@ void* CW_TlsLib_MakeDtlsSocketSecure(int* pSd,
 // its handle.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
+void TLSBM_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
 {
     MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
@@ -405,9 +406,9 @@ void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
     mbedtls_net_free(&pSsl->netCtx);
     mbedtls_ssl_free(&pSsl->sslCtx);
 
-    CW_Common_Free(pSsl);
+    TLSBM_Common_Free(pSsl);
 
-} // End: CW_TlsLib_UnmakeSocketSecure()
+} // End: TLSBM_TlsLib_UnmakeSocketSecure()
 
 
 //------------------------------------------------------------------------------
@@ -415,7 +416,7 @@ void CW_TlsLib_UnmakeSocketSecure(int sd, void* pSecureSocketCtx)
 // Destroys a security context.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
+void TLSBM_TlsLib_DestroySecureContext(void* pSecureCtx)
 {
     MbedTlsContext_t* pCtx = (MbedTlsContext_t*)pSecureCtx;
 
@@ -429,8 +430,8 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
         mbedtls_ssl_cookie_free(&pCtx->cookies);
     }
 
-    CW_Common_Free(pCtx);
-} // End: CW_TlsLib_DestroySecureContext()
+    TLSBM_Common_Free(pCtx);
+} // End: TLSBM_TlsLib_DestroySecureContext()
 
 
 //------------------------------------------------------------------------------
@@ -438,7 +439,7 @@ void CW_TlsLib_DestroySecureContext(void* pSecureCtx)
 // Performs client handshake.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
+void TLSBM_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 {
     MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
 
@@ -448,7 +449,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
         ret = mbedtls_ssl_handshake(&pSsl->sslCtx);
     } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
             ret == MBEDTLS_ERR_SSL_WANT_WRITE);
-} // End: CW_TlsLib_ClientHandshake()
+} // End: TLSBM_TlsLib_ClientHandshake()
 
 
 //------------------------------------------------------------------------------
@@ -456,7 +457,7 @@ void CW_TlsLib_ClientHandshake(int sd, void* pSecureSocketCtx)
 // Performs server handshake.
 //
 //------------------------------------------------------------------------------
-int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
+int TLSBM_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 {
     MbedTlsObject_t* pSsl = (MbedTlsObject_t*)pSecureSocketCtx;
     bool retry = true;
@@ -469,7 +470,7 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
                                                 pSsl->pPeerAddr,
                                                 pSsl->peerAddrSize) != 0)
         {
-            CW_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
+            TLSBM_Common_Die("mbedtls_ssl_set_client_transport_id error\n");
         }
 
         do
@@ -491,7 +492,7 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
     }
 
     return ret;
-} // End: CW_TlsLib_ServerHandshake()
+} // End: TLSBM_TlsLib_ServerHandshake()
 
 
 //------------------------------------------------------------------------------
@@ -499,7 +500,7 @@ int CW_TlsLib_ServerHandshake(int sd, void* pSecureSocketCtx)
 // Sends data securely until everything has been sent in a loop.
 //
 //------------------------------------------------------------------------------
-void CW_TlsLib_SendAll(int sd,
+void TLSBM_TlsLib_SendAll(int sd,
                        void* pSecureSocketCtx,
                        uint8_t* pData,
                        size_t dataBytes)
@@ -511,10 +512,10 @@ void CW_TlsLib_SendAll(int sd,
         ret = mbedtls_ssl_write(&pSsl->sslCtx, pData, dataBytes);
     } while (ret == MBEDTLS_ERR_SSL_WANT_READ ||
             ret == MBEDTLS_ERR_SSL_WANT_WRITE);
-} // End: CW_TlsLib_SendAll()
+} // End: TLSBM_TlsLib_SendAll()
 
 
-void CW_TlsLib_SendToAll(int sd,
+void TLSBM_TlsLib_SendToAll(int sd,
                          void* pSecureSocketCtx,
                          uint32_t ip4Addr,
                          uint16_t port,
@@ -537,7 +538,7 @@ void CW_TlsLib_SendToAll(int sd,
 // reads data of specified length
 //
 //------------------------------------------------------------------------------
-int CW_TlsLib_Recv(int sd,
+int TLSBM_TlsLib_Recv(int sd,
                    void* pSecureSocketCtx,
                    uint8_t* pData,
                    size_t dataBytes)
@@ -576,13 +577,13 @@ int CW_TlsLib_Recv(int sd,
 // Shut the security library down.
 //
 //-----------------------------------------------------------------------------
-void CW_TlsLib_Shutdown(void)
+void TLSBM_TlsLib_Shutdown(void)
 {
-    mbedtls_ctr_drbg_free(&cw_TlsLib_ctrDrbg);
-    mbedtls_entropy_free(&cw_TlsLib_entropy);
-} // End: CW_TlsLib_Shutdown()
+    mbedtls_ctr_drbg_free(&tlsbm_TlsLib_ctrDrbg);
+    mbedtls_entropy_free(&tlsbm_TlsLib_entropy);
+} // End: TLSBM_TlsLib_Shutdown()
 
-const char* CW_TlsLib_GetName(void)
+const char* TLSBM_TlsLib_GetName(void)
 {
     return "mbedtls";
 }
